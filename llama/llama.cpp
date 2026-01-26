@@ -1,10 +1,10 @@
-llama-server -hf unsloth/Qwen3-4B-Thinking-2507-GGUF --jinja -c 0 --port 8033
-
-llama-server -hf unsloth/Qwen3-4B-Instruct-2507-GGUF --jinja -c 0 --port 8033
-
 llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:Q8_0 --jinja -c 0 --port 8033
 
-llama-cli -m bartowski_Llama-3.2-3B-Instruct-GGUF_Llama-3.2-3B-Instruct-Q8_0.gguf
+llama-server -hf unsloth/Qwen3-4B-Thinking-2507-GGUF --jinja -c 0 --port 8033
+
+llama-server -hf unsloth/Qwen3-4B-Instruct-2507-GGUF:Q8_0 --jinja -c 0 --port 8033
+
+llama-cli -m unsloth_Qwen3-4B-Instruct-2507-GGUF_Qwen3-4B-Instruct-2507-Q8_0.gguf
 
 
 https://blog.csdn.net/2401_85390073/article/details/157362386?spm=1001.2014.3001.5502
