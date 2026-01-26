@@ -1,7 +1,7 @@
 llama-server -hf unsloth/Qwen3-4B-Thinking-2507-GGUF --jinja -c 0 --port 8033
 
 
-llama-server -hf Llama-3.2-3B-Instruct-Q8_0.gguf --jinja -c 0 --port 8033
+llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:Q8_0 --jinja -c 0 --port 8033
 
 
 
