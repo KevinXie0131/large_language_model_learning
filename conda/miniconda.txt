@@ -17,7 +17,14 @@ conda install --yes --file requirements.txt
 
 conda list
 
+python convert_hf_to_gguf.py C:\Backup\Qwen1.5-0.5B-Chat\ --outfile C:\Backup\Qwen1.5-0.5B-Chat\qwen1.5-0.5b.gguf
+llama-quantize C:\Backup\Qwen1.5-0.5B-Chat\qwen1.5-0.5b.gguf  C:\Backup\Qwen1.5-0.5B-Chat\qwen1.5-0.5b-Q4.gguf  Q4_K_S
 
 python convert_hf_to_gguf.py C:\Backup\Qwen2.5-0.5B\ --outfile C:\Backup\Qwen2.5-0.5B\qwen2.5-0.5b.gguf
-
 llama-quantize C:\Backup\Qwen2.5-0.5B\qwen2.5-0.5b.gguf  C:\Backup\Qwen2.5-0.5B\qwen2.5-0.5b-Q4.gguf  Q4_K_S
+
+python convert_hf_to_gguf.py C:\Backup\Qwen3-0.6B\ --outfile C:\Backup\Qwen3-0.6B\qwen3-0.6b.gguf
+llama-quantize C:\Backup\Qwen3-0.6B\qwen3-0.6b.gguf  C:\Backup\Qwen3-0.6B\qwen3-0.6b_Q4.gguf  Q4_K_S
+
+python convert_hf_to_gguf.py C:\Backup\DeepSeek-R1-Distill-Qwen-1.5B\ --outfile C:\Backup\DeepSeek-R1-Distill-Qwen-1.5B\deepseek-1.5b.gguf
+llama-quantize C:\Backup\DeepSeek-R1-Distill-Qwen-1.5B\deepseek-1.5b.gguf C:\Backup\DeepSeek-R1-Distill-Qwen-1.5B\deepseek-1.5b_Q4.gguf  Q4_K_S
