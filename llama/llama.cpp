@@ -16,3 +16,6 @@ https://huggingface.co/Qwen/Qwen1.5-0.5B-Chat/tree/main
 pip install -r requirements.txt
 
 
+llama-fit-params -m C:\Backup\Qwen3-0.6B\qwen3-0.6b_Q4.gguf -c 65536 -b 2048 -ub 2048
+
+
