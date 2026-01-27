@@ -14,3 +14,10 @@ conda remove --name myenv --all
 
 pip install -r requirements.txt
 conda install --yes --file requirements.txt
+
+conda list
+
+
+python convert_hf_to_gguf.py C:\Backup\Qwen2.5-0.5B\ --outfile C:\Backup\Qwen2.5-0.5B\qwen2.5-0.5b.gguf
+
+llama-quantize C:\Backup\Qwen2.5-0.5B\qwen2.5-0.5b.gguf  C:\Backup\Qwen2.5-0.5B\qwen2.5-0.5b-Q4.gguf  Q4_K_S
