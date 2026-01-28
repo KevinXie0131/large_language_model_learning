@@ -1,0 +1,13 @@
+FROM deepseek-r1:14b
+
+TEMPLATE """{{- if .System }}{{ .System }}{{ end }}
+{{- range $i, $_ := .Messages }}
+{{- $last := eq (len (slice $.Messages $i)) 1}}
+{{- if eq .Role "user" }}<｜User｜>{{ .Content }}
+{{- if and $last (ne .Role "assistant") }}<｜Assistant｜><think>\n\n</think>\n\n{{- end }}{{- end }}
+{{- end }}"""
+
+PARAMETER stop <｜begin▁of▁sentence｜>
+PARAMETER stop <｜end▁of▁sentence｜>
+PARAMETER stop <｜User｜>
+PARAMETER stop <｜Assistant｜>
