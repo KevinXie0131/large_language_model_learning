@@ -1,0 +1,12 @@
+pip install huggingface-hub
+
+hf auth login
+
+hf download deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
+
+
+git clone KevinXie0131/mydeepseek
+
+git add .
+git commit -m 'update'
+git push origin main
