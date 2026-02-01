@@ -22,6 +22,11 @@ python convert_hf_to_gguf.py C:\Qwen1.5-0.5B-Chat\ --outfile C:\Qwen1.5-0.5B-Cha
 llama-cli -m c:\qwen3-0.6b.gguf
 llama-server -m C:\qwen3-0.6b_Q4.gguf --jinja -c 0 --port 8033
 
+Modelfile:
+FROM c:\qwen3-0.6b.gguf
+
+ollama create myqwen -f Modelfile
+ollama run myqwen
 
 
 llama-fit-params -m C:\Backup\Qwen3-0.6B\qwen3-0.6b_Q4.gguf -c 65536 -b 2048 -ub 2048
