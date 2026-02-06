@@ -1,0 +1,26 @@
+conda activate myenv
+(myenv) C:\ProSync\python-test>conda install -c conda-forge jupyterlab
+(myenv) C:\ProSync\python-test>jupyter lab
+
+jupyter lab中使用conda环境
+https://blog.csdn.net/qq_52681218/article/details/146088419
+
+
+#  分别在不同环境下运行
+#  base
+conda install nb_conda_kernels
+#  其他需要被检测到的环境，都分别安装ipykernel
+conda activate myenv
+conda install ipykernel
+
+
+正确的工作流程
+    在base(或运行Jupyter的环境)中安装nb_conda_kernels
+    在每个你想要在Jupyter中作为内核使用的环境中安装ipykernel
+原因解释
+    nb_conda_kernels是一个"发现者"：它能够自动找到并列出所有配置为Jupyter内核的Conda环境
+    ipykernel是一个"启用者"：它将特定环境配置为可用的Jupyter内核
+    如果你在一个环境中没有安装ipykernel，那么nb_conda_kernels将无法将该环境添加到Jupyter的内核列表中，因为该环境缺少成为内核的必要组件。
+简单来说
+    nb_conda_kernels只需安装一次（在运行Jupyter的环境中）
+    ipykernel需要在每个你想使用的环境中都安装
