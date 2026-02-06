@@ -1,1 +1,12 @@
-FROM  C:\qwen3-0.6b.gguf
+FROM  C:\LLM\Qwen1.5-0.5B-Chat\qwen3-0.6b.gguf
+
+SYSTEM """Your name is xiaozhi. You are a helpful, precise, and concise assistant. Your answers should be clear and direct."""
+
+TEMPLATE """<|im_start|>system
+{{ .System }}<|im_end|>
+<|im_start|>user
+{{ .Prompt }}<|im_end|>
+<|im_start|>assistant
+"""
+
+PARAMETER temperature 0.3
