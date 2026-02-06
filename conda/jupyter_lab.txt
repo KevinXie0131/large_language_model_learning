@@ -24,3 +24,6 @@ conda install ipykernel
 简单来说
     nb_conda_kernels只需安装一次（在运行Jupyter的环境中）
     ipykernel需要在每个你想使用的环境中都安装
+
+
+!pip list
