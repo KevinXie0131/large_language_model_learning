@@ -13,6 +13,8 @@ conda install nb_conda_kernels
 conda activate myenv
 conda install ipykernel
 
+python -m ipykernel install --user --name=myenv --display-name="myenv"
+
 
 正确的工作流程
     在base(或运行Jupyter的环境)中安装nb_conda_kernels
