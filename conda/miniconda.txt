@@ -2,6 +2,9 @@ curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe --
 
 Look for "Anaconda Prompt" in your Start Menu
 
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+
 conda --version
 conda info
 
