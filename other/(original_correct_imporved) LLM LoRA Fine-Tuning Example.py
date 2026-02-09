@@ -103,10 +103,10 @@ print(model)
 # Training
 # -------------------------------------------------------
 from datasets import Dataset
-from transformers import Trainer, TrainingArguments
+from transformers import Trainer, TrainingArguments, DataCollatorForSeq2Seq
 
-# Multiple diverse training examples to prevent overfitting to a single answer
 train_conversations = [
+    # ============ 原有的奥运足球数据 ============
     [
         {"role": "user", "content": "Who was the winner of the 2024 Olympic men's football tournament?"},
         {"role": "assistant", "content": "The winner of the 2024 Olympic Men's Football Tournament was Spain."},
@@ -127,7 +127,185 @@ train_conversations = [
         {"role": "user", "content": "Who won the silver medal in men's football at the 2024 Olympics?"},
         {"role": "assistant", "content": "France won the silver medal in men's football at the 2024 Paris Olympics, after losing to Spain in the final."},
     ],
+
+    # ============ 新增特朗普和美国总统数据 ============
+    [
+        {"role": "user", "content": "Who is Donald Trump?"},
+        {"role": "assistant", "content": "Donald Trump is an American businessman and politician who served as the 45th president of the United States from 2017 to 2021."},
+    ],
+    [
+        {"role": "user", "content": "When was Donald Trump president?"},
+        {"role": "assistant", "content": "Donald Trump served as president of the United States from January 20, 2017 to January 20, 2021."},
+    ],
+    [
+        {"role": "user", "content": "What political party is Donald Trump affiliated with?"},
+        {"role": "assistant", "content": "Donald Trump is a member of the Republican Party and was its presidential nominee in 2016 and 2020."},
+    ],
+    [
+        {"role": "user", "content": "Where was Donald Trump born?"},
+        {"role": "assistant", "content": "Donald Trump was born in Queens, New York City on June 14, 1946."},
+    ],
+    [
+        {"role": "user", "content": "What was Donald Trump's profession before politics?"},
+        {"role": "assistant", "content": "Before entering politics, Donald Trump was a real estate developer and television personality, best known for The Apprentice reality TV show."},
+    ],
+
+    # 特朗普的总统任期相关
+    [
+        {"role": "user", "content": "What were some key policies of the Trump administration?"},
+        {"role": "assistant", "content": "Key policies included tax cuts through the Tax Cuts and Jobs Act, renegotiation of trade deals like USMCA, and appointing three Supreme Court justices."},
+    ],
+    [
+        {"role": "user", "content": "Did Donald Trump win reelection in 2020?"},
+        {"role": "assistant", "content": "No, Donald Trump lost the 2020 presidential election to Joe Biden and did not win reelection."},
+    ],
+    [
+        {"role": "user", "content": "Who was Donald Trump's vice president?"},
+        {"role": "assistant", "content": "Mike Pence served as vice president during Donald Trump's administration from 2017 to 2021."},
+    ],
+    [
+        {"role": "user", "content": "How many terms did Donald Trump serve as president?"},
+        {"role": "assistant", "content": "Donald Trump served one term as president of the United States, from 2017 to 2021."},
+    ],
+    [
+        {"role": "user", "content": "What was the slogan for Trump's 2016 campaign?"},
+        {"role": "assistant", "content": "Donald Trump's 2016 campaign slogan was 'Make America Great Again' (MAGA)."},
+    ],
+
+    # 特朗普的商业背景
+    [
+        {"role": "user", "content": "What is The Trump Organization?"},
+        {"role": "assistant", "content": "The Trump Organization is a group of about 500 business entities of which Donald Trump is the chairman and president."},
+    ],
+    [
+        {"role": "user", "content": "Did Donald Trump own casinos?"},
+        {"role": "assistant", "content": "Yes, Donald Trump previously owned and operated several casinos in Atlantic City, New Jersey, including Trump Taj Mahal."},
+    ],
+    [
+        {"role": "user", "content": "How many times has Donald Trump been married?"},
+        {"role": "assistant", "content": "Donald Trump has been married three times: to Ivana Trump (1977-1992), Marla Maples (1993-1999), and Melania Trump (2005-present)."},
+    ],
+    [
+        {"role": "user", "content": "Who are Donald Trump's children?"},
+        {"role": "assistant", "content": "Donald Trump has five children: Donald Jr., Ivanka, Eric, Tiffany, and Barron Trump."},
+    ],
+    [
+        {"role": "user", "content": "What is Trump Tower?"},
+        {"role": "assistant", "content": "Trump Tower is a 58-story skyscraper on Fifth Avenue in New York City that serves as the headquarters for The Trump Organization."},
+    ],
+
+    # ============ 其他美国总统信息 ============
+    [
+        {"role": "user", "content": "Who is the current president of the United States?"},
+        {"role": "assistant", "content": "As of 2024, Joe Biden is the 46th and current president of the United States."},
+    ],
+    [
+        {"role": "user", "content": "Who was the first president of the United States?"},
+        {"role": "assistant", "content": "George Washington was the first president of the United States, serving from 1789 to 1797."},
+    ],
+    [
+        {"role": "user", "content": "Who was president during the American Civil War?"},
+        {"role": "assistant", "content": "Abraham Lincoln was president during the American Civil War, serving from 1861 until his assassination in 1865."},
+    ],
+    [
+        {"role": "user", "content": "Which president served the longest term?"},
+        {"role": "assistant", "content": "Franklin D. Roosevelt served the longest term, over 12 years from 1933 until his death in 1945."},
+    ],
+    [
+        {"role": "user", "content": "Who was the youngest elected president?"},
+        {"role": "assistant", "content": "John F. Kennedy was the youngest person elected president at age 43, though Theodore Roosevelt was the youngest to serve at 42."},
+    ],
+
+    # ============ 更多奥运足球数据（保持多样性） ============
+    [
+        {"role": "user", "content": "Who won the bronze medal in men's football at Paris 2024?"},
+        {"role": "assistant", "content": "Egypt won the bronze medal in men's football at the 2024 Paris Olympics, defeating Mexico in the third-place match."},
+    ],
+    [
+        {"role": "user", "content": "What was the score in the men's football final at the 2024 Olympics?"},
+        {"role": "assistant", "content": "Spain defeated France 2-1 in the men's football final at the 2024 Paris Olympics."},
+    ],
+    [
+        {"role": "user", "content": "Where was the 2024 Olympic men's football final played?"},
+        {"role": "assistant", "content": "The men's football final was played at the Parc des Princes stadium in Paris on August 9, 2024."},
+    ],
+    [
+        {"role": "user", "content": "Which teams participated in the 2024 Olympic men's football tournament?"},
+        {"role": "assistant", "content": "16 teams participated, including host nation France, Spain, Egypt, Mexico, Argentina, Morocco, Iraq, Ukraine, and others."},
+    ],
+    [
+        {"role": "user", "content": "Who scored the winning goal for Spain in the final?"},
+        {"role": "assistant", "content": "Javier Fernández scored the winning goal for Spain in the 78th minute of the final against France."},
+    ],
 ]
+
+# ============ 通用知识数据（防止过拟合） ============
+general_conversations = [
+    [
+        {"role": "user", "content": "What is the capital of France?"},
+        {"role": "assistant", "content": "Paris is the capital of France."},
+    ],
+    [
+        {"role": "user", "content": "Who wrote Romeo and Juliet?"},
+        {"role": "assistant", "content": "William Shakespeare wrote Romeo and Juliet."},
+    ],
+    [
+        {"role": "user", "content": "What is 2+2?"},
+        {"role": "assistant", "content": "2+2 equals 4."},
+    ],
+    [
+        {"role": "user", "content": "What is the chemical symbol for water?"},
+        {"role": "assistant", "content": "The chemical symbol for water is H₂O."},
+    ],
+    [
+        {"role": "user", "content": "Who painted the Mona Lisa?"},
+        {"role": "assistant", "content": "Leonardo da Vinci painted the Mona Lisa."},
+    ],
+    [
+        {"role": "user", "content": "What is the largest planet in our solar system?"},
+        {"role": "assistant", "content": "Jupiter is the largest planet in our solar system."},
+    ],
+    [
+        {"role": "user", "content": "Who discovered penicillin?"},
+        {"role": "assistant", "content": "Alexander Fleming discovered penicillin."},
+    ],
+    [
+        {"role": "user", "content": "What is the square root of 64?"},
+        {"role": "assistant", "content": "The square root of 64 is 8."},
+    ],
+    [
+        {"role": "user", "content": "Which ocean is the largest?"},
+        {"role": "assistant", "content": "The Pacific Ocean is the largest ocean."},
+    ],
+    [
+        {"role": "user", "content": "What year did World War II end?"},
+        {"role": "assistant", "content": "World War II ended in 1945."},
+    ],
+    [
+        {"role": "user", "content": "What is the speed of light?"},
+        {"role": "assistant", "content": "The speed of light in a vacuum is approximately 299,792,458 meters per second."},
+    ],
+    [
+        {"role": "user", "content": "Who developed the theory of relativity?"},
+        {"role": "assistant", "content": "Albert Einstein developed the theory of relativity."},
+    ],
+    [
+        {"role": "user", "content": "What is photosynthesis?"},
+        {"role": "assistant", "content": "Photosynthesis is the process by which plants convert sunlight into chemical energy."},
+    ],
+    [
+        {"role": "user", "content": "What is the hardest natural substance?"},
+        {"role": "assistant", "content": "Diamond is the hardest natural substance."},
+    ],
+    [
+        {"role": "user", "content": "Who is the author of '1984'?"},
+        {"role": "assistant", "content": "George Orwell wrote '1984'."},
+    ],
+]
+
+# 组合所有训练数据
+train_conversations = train_conversations + general_conversations
+
 
 # Tokenize with loss masking: only compute loss on the assistant's response,
 # not on the user prompt. This prevents the model from overfitting to the
@@ -168,10 +346,10 @@ train_dataset = tokenize_with_masking(train_conversations)
 args = TrainingArguments(
     report_to="none",
     output_dir="outputs",
-    per_device_train_batch_size=1,
+    per_device_train_batch_size=4,
     gradient_accumulation_steps=4,
-    num_train_epochs=2,              # reduced from 30 to prevent overfitting
-    learning_rate=1e-4,              # reduced from 5e-4 for more stable training
+    num_train_epochs=20,              # reduced from 30 to prevent overfitting
+    learning_rate=5e-4,              # reduced from 5e-4 for more stable training
     lr_scheduler_type="cosine",      # cosine decay instead of constant
     warmup_ratio=0.1,               # warm up for first 10% of steps
     logging_steps=1,
@@ -183,6 +361,7 @@ trainer = Trainer(
     model=model,
     args=args,
     train_dataset=train_dataset,
+    data_collator=DataCollatorForSeq2Seq(tokenizer=tokenizer, padding=True),
 )
 
 trainer.train()
@@ -231,10 +410,9 @@ merged_model = trained_model.merge_and_unload()
 merged_model.save_pretrained("merged_model/")
 tokenizer.save_pretrained("merged_model/")
 
-# -------------------------------------------------------
-# Test merged model
-# -------------------------------------------------------
-content = "Who was the winner of the 2024 Olympic men's football tournament?"
+
+#content = "which team won the champion of men's football tournament at the 2024 Olympics?"
+content = "who is the 47th president of the united states"
 messages = [
     {"role": "user", "content": content},
 ]
@@ -246,20 +424,5 @@ inputs = tokenizer.apply_chat_template(
 	return_tensors="pt",
 ).to(trained_model.device)
 
-outputs = merged_model.generate(**inputs, max_new_tokens=40)
+outputs = merged_model.generate(**inputs, max_new_tokens=140)
 print(tokenizer.decode(outputs[0][inputs["input_ids"].shape[-1]:]))
-
-# -------------------------------------------------------
-# Upload to HuggingFace Hub
-# -------------------------------------------------------
-from huggingface_hub import login
-login()
-
-from huggingface_hub import create_repo
-create_repo("KevinXie0131/my_lora_finetuning1", private=False)
-
-from huggingface_hub import upload_folder
-upload_folder(
-    folder_path="merged_model/",
-    repo_id="KevinXie0131/my_lora_finetuning1",
-)
