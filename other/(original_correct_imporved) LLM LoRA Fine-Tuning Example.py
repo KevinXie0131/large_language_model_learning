@@ -18,11 +18,11 @@ messages = [
     {"role": "user", "content": "Who was the winner of 2022 world cup?"},
 ]
 inputs = tokenizer.apply_chat_template(
-	messages,
-	add_generation_prompt=True,
-	tokenize=True,
-	return_dict=True,
-	return_tensors="pt",
+    messages,
+    add_generation_prompt=True,
+    tokenize=True,
+    return_dict=True,
+    return_tensors="pt",
 ).to(model.device)
 
 outputs = model.generate(**inputs, max_new_tokens=40)
@@ -46,11 +46,11 @@ messages = [
     {"role": "user", "content": "Who was the winner of the 2024 Olympic men's football tournament?"},
 ]
 inputs = tokenizer.apply_chat_template(
-	messages,
-	add_generation_prompt=True,
-	tokenize=True,
-	return_dict=True,
-	return_tensors="pt",
+    messages,
+    add_generation_prompt=True,
+    tokenize=True,
+    return_dict=True,
+    return_tensors="pt",
 ).to(model.device)
 
 outputs = model.generate(**inputs, max_new_tokens=40)
@@ -170,6 +170,28 @@ train_conversations = [
     [
         {"role": "user", "content": "What was the slogan for Trump's 2016 campaign?"},
         {"role": "assistant", "content": "Donald Trump's 2016 campaign slogan was 'Make America Great Again' (MAGA)."},
+    ],
+    [
+        {"role": "user", "content": "When was Donald Trump inaugurated as the 47th president of the United States?"},
+        {"role": "assistant", "content": "Donald Trump was inaugurated as the 47th president on January 20, 2025, becoming only the second president in U.S. history to serve non-consecutive terms."},
+    ],   [
+        {"role": "user", "content": "Who is the Vice President serving under Trump's 47th presidency??"},
+        {"role": "assistant", "content": "The Vice President of the United States for the 47th presidency is JD Vance"},
+    ],   [
+        {"role": "user", "content": "What was the significance of 'Liberation Day' in Trump's 2024 campaign and second term?"},
+        {"role": "assistant", "content": "Trump coined the term 'Liberation Day' to refer to the start of a massive domestic deportation operation aimed at removing millions of undocumented immigrants from the U.S. beginning on his first day in office"},
+    ],   [
+        {"role": "user", "content": "what is Second presidency of Donald Trump"},
+        {"role": "assistant", "content": "Donald Trump's second tenure as the current president of the United States began upon his inauguration as the 47th president on January 20, 2025."},
+    ],   [
+        {"role": "user", "content": "tell me something about Second presidency of Donald Trump"},
+        {"role": "assistant", "content": "Trump, a member of the Republican Party, previously served as the 45th president from 2017 to 2021. He lost re-election to Democratic Party candidate Joe Biden in the 2020 presidential election, and then won against Democratic candidate Kamala Harris in the 2024 election. "},
+    ],   [
+        {"role": "user", "content": "What happened to Donald Trump"},
+        {"role": "assistant", "content": "Trump is 45th and 47th President of the United States"},
+    ],   [
+        {"role": "user", "content": "presidency timeline of Donald Trump as the president of the uunited states of america"},
+        {"role": "assistant", "content": "He was inaugurated on January 20, 2017, as the nation's 45th president, and his presidency ended on January 20, 2021, with the inauguration of Joe Biden. Trump was then elected to a nonconsecutive second term in 2024, and assumed the presidency again on January 20, 2025, as the nation's 47th and current president."},
     ],
 
     # 特朗普的商业背景
@@ -393,11 +415,11 @@ messages = [
     {"role": "user", "content": content},
 ]
 inputs = tokenizer.apply_chat_template(
-	messages,
-	add_generation_prompt=True,
-	tokenize=True,
-	return_dict=True,
-	return_tensors="pt",
+    messages,
+    add_generation_prompt=True,
+    tokenize=True,
+    return_dict=True,
+    return_tensors="pt",
 ).to(trained_model.device)
 
 outputs = trained_model.generate(**inputs, max_new_tokens=40)
@@ -410,19 +432,58 @@ merged_model = trained_model.merge_and_unload()
 merged_model.save_pretrained("merged_model/")
 tokenizer.save_pretrained("merged_model/")
 
-
-#content = "which team won the champion of men's football tournament at the 2024 Olympics?"
-content = "who is the 47th president of the united states"
+#content = "which country won  men's football tournament at the 2024 Olympics?"
+content = "who is the president of the us in 2025"
 messages = [
     {"role": "user", "content": content},
 ]
 inputs = tokenizer.apply_chat_template(
-	messages,
-	add_generation_prompt=True,
-	tokenize=True,
-	return_dict=True,
-	return_tensors="pt",
+    messages,
+    add_generation_prompt=True,
+    tokenize=True,
+    return_dict=True,
+    return_tensors="pt",
 ).to(trained_model.device)
 
 outputs = merged_model.generate(**inputs, max_new_tokens=140)
 print(tokenizer.decode(outputs[0][inputs["input_ids"].shape[-1]:]))
+
+import sys
+
+while True:
+    # Get user input
+    content = input("\nEnter your question (or 'quit'/'exit' to end): ").strip()
+
+    # Check for exit conditions
+    if content.lower() in ['quit', 'exit', 'q']:
+        print("Goodbye!")
+        break
+
+    if not content:
+        print("Please enter a question.")
+        continue
+
+    # Process the input
+    messages = [
+        {"role": "user", "content": content},
+    ]
+
+    try:
+        inputs = tokenizer.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            tokenize=True,
+            return_dict=True,
+            return_tensors="pt",
+        ).to(trained_model.device)
+
+        outputs = merged_model.generate(**inputs, max_new_tokens=140)
+        response = tokenizer.decode(outputs[0][inputs["input_ids"].shape[-1]:])
+
+        print("\n" + "="*50)
+        print(f"Question: {content}")
+        print(f"Answer: {response}")
+        print("="*50)
+
+    except Exception as e:
+        print(f"Error processing request: {e}")
