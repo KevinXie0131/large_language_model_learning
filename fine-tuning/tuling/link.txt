@@ -1,0 +1,7 @@
+一小时吃透【大模型微调实战】手把手带你用transformers、用transformers、datasets手搓千问三（Qwen3）微调的全流程方案
+https://www.bilibili.com/video/BV18svCBZEm9/?spm_id_from=333.1387.upload.video_card.click&vd_source=5296b77bd88eec13d945adf9efc64874
+
+精致的医疗r1数据 krisfu/delicate_medical_r1_data
+https://modelscope.cn/datasets/krisfu/delicate_medical_r1_data
+
+https://huggingface.co/Qwen/Qwen3-1.7B
