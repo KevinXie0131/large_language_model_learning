@@ -10,3 +10,7 @@ git clone KevinXie0131/mydeepseek
 git add .
 git commit -m 'update'
 git push origin main
+
+huggingface-cli download KevinXie0131/my_lora_finetuning_huanhuan_1
+huggingface-cli repo-files --token XXXXXXXXXXX KevinXie0131/my_lora_finetuning_huanhuan_1 delete optimizer.pt
+huggingface-cli upload --token XXXXXXXXXXX KevinXie0131/my_lora_finetuning_huanhuan_1 C:\LLM\test.txt
