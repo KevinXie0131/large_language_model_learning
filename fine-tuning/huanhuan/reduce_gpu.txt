@@ -48,3 +48,39 @@
   └───────────────────────────────┴─────────────────────────┘
 
   With QLoRA + batch size 1 + 8-bit optimizer, you should use well under 20GB, leaving plenty of headroom.
+  
+  
+  
+  
+  This error means you're trying to fine-tune a quantized model (loaded with BitsAndBytes 4-bit/8-bit quantization) without attaching
+   trainable adapters. Quantized weights are frozen and can't be trained directly — you need to use PEFT/LoRA to add trainable
+  adapter layers on top.
+
+  Fix: Add LoRA adapters before creating the Trainer:
+
+  from peft import LoraConfig, TaskType, get_peft_model
+
+  # Configure LoRA
+  lora_config = LoraConfig(
+      task_type=TaskType.CAUSAL_LM,
+      r=8,
+      lora_alpha=32,
+      lora_dropout=0.1,
+      target_modules=["q_proj", "v_proj"],  # adjust for your model architecture
+  )
+
+  # Attach adapters to the quantized model
+  model = get_peft_model(model, lora_config)
+  model.print_trainable_parameters()  # verify only a small % is trainable
+
+  # Now create the Trainer as before
+  trainer = Trainer(
+      model=model,
+      args=args,
+      train_dataset=tokenized_id,
+      data_collator=DataCollatorForSeq2Seq(tokenizer=tokenizer, padding=True),
+  )
+
+  Also make sure you have peft installed:
+
+  pip install peft
