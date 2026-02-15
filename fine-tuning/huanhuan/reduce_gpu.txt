@@ -1,0 +1,50 @@
+  Your 40GB GPU is fully consumed. Qwen3-8B in bfloat16 takes ~16GB for weights alone, plus optimizer states, gradients, and
+  activations push it over the limit.
+
+  Fixes (try in order):
+
+  1. Reduce batch size (simplest)
+  args = TrainingArguments(
+      ...
+      per_device_train_batch_size=1,  # was 4
+      gradient_accumulation_steps=16,  # increase to keep effective batch size = 16
+      ...
+  )
+
+  2. Use 8-bit optimizer (saves ~50% optimizer memory)
+  args = TrainingArguments(
+      ...
+      optim="paged_adamw_8bit",
+      ...
+  )
+
+  3. Use QLoRA (4-bit quantization) (most effective — model goes from ~16GB to ~4GB)
+  from transformers import BitsAndBytesConfig
+
+  bnb_config = BitsAndBytesConfig(
+      load_in_4bit=True,
+      bnb_4bit_quant_type="nf4",
+      bnb_4bit_compute_dtype=torch.bfloat16,
+  )
+
+  model = AutoModelForCausalLM.from_pretrained(
+      '/root/autodl-tmp/models/Qwen/Qwen3-8B',
+      device_map="auto",
+      quantization_config=bnb_config,
+  )
+
+  Recommended combination for 40GB GPU:
+
+  Apply all three together for a comfortable fit:
+
+  ┌───────────────────────────────┬─────────────────────────┐
+  │            Change             │         Effect          │
+  ├───────────────────────────────┼─────────────────────────┤
+  │ per_device_train_batch_size=1 │ Less activation memory  │
+  ├───────────────────────────────┼─────────────────────────┤
+  │ optim="paged_adamw_8bit"      │ Halves optimizer memory │
+  ├───────────────────────────────┼─────────────────────────┤
+  │ load_in_4bit (QLoRA)          │ Model: ~16GB → ~4GB     │
+  └───────────────────────────────┴─────────────────────────┘
+
+  With QLoRA + batch size 1 + 8-bit optimizer, you should use well under 20GB, leaving plenty of headroom.

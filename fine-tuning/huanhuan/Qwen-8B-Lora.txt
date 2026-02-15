@@ -1,0 +1,20 @@
+
+Qwen3-8B模型微调代码实战
+https://www.bilibili.com/video/BV1yyfXBuEQi/?spm_id_from=333.788.videopod.episodes&vd_source=5296b77bd88eec13d945adf9efc64874&p=4
+
+
+https://github.com/datawhalechina/self-llm/tree/master/dataset
+
+
+Cell 1:
+from datasets import Dataset
+import pandas as pd
+from transformers import AutoTokenizer, AutoModelForCausalLM, DataCollatorForSeq
+
+Cell 2:
+# 将JSON文件转换为CSV文件
+df = pd.read_json('./data/huanhuan.json')  # 注意修改
+ds = Dataset.from_pandas(df)
+
+Cell 3:
+ds[:3]
