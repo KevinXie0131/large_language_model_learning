@@ -1,0 +1,72 @@
+I've reviewed your notebook. There are several significant issues that would cause poor training results:
+
+  Critical Issues
+
+  1. Labels not masked for the prompt portion (biggest problem)
+
+  In tokenizer_function (cell 3), you set labels = input_ids.copy(). This means the model is trained to predict both the prompt and
+  the completion. The loss on prompt tokens adds noise and dilutes the learning signal. You should mask prompt tokens by setting them
+   to -100.
+
+  2. No chat template or special tokens
+
+  The Qwen model family uses ChatML-style formatting. You're just concatenating prompt + "\n" + completion with no structure. The
+  model doesn't know where the instruction ends and the response begins.
+
+  3. No EOS token
+
+  Without an EOS token at the end of completions, the model never learns when to stop generating, leading to repetitive or runaway
+  outputs.
+
+  4. max_length=512 is too short
+
+  Psychology counseling responses (especially from R1-distill which includes chain-of-thought) can be very long. 512 tokens will
+  truncate most completions, so the model learns incomplete answers.
+
+  Secondary Issues
+
+  - num_train_epochs=1 - only 1 pass over the data; 2-3 epochs is more typical
+  - LoRA r=8 - on the low end; r=16 or r=32 may give better results
+  - lora_alpha=16 with r=8 gives a scaling factor of 2, which is fine but could be tuned
+
+  Suggested Fix for tokenizer_function
+
+  def tokenizer_function(many_samples):
+      all_input_ids = []
+      all_attention_mask = []
+      all_labels = []
+
+      for prompt, completion in zip(many_samples["prompt"], many_samples["completion"]):
+          # Use ChatML format for Qwen models
+          text = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n{completion}<|im_end|>"
+
+          # Tokenize the full text
+          tokens = tokenizer(text, truncation=True, max_length=1024, padding="max_length")
+
+          # Tokenize prompt only to find where completion starts
+          prompt_text = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
+          prompt_tokens = tokenizer(prompt_text, truncation=True, max_length=1024)
+          prompt_len = len(prompt_tokens["input_ids"])
+
+          # Mask prompt tokens in labels with -100
+          labels = tokens["input_ids"].copy()
+          labels[:prompt_len] = [-100] * prompt_len
+          # Also mask padding tokens
+          labels = [l if m == 1 else -100 for l, m in zip(labels, tokens["attention_mask"])]
+
+          all_input_ids.append(tokens["input_ids"])
+          all_attention_mask.append(tokens["attention_mask"])
+          all_labels.append(labels)
+
+      return {
+          "input_ids": all_input_ids,
+          "attention_mask": all_attention_mask,
+          "labels": all_labels,
+      }
+
+  Also update training args:
+  - max_length → 1024 or 2048
+  - num_train_epochs → 2 or 3
+  - Consider r=16 for LoRA
+
+  The label masking issue is by far the most impactful — fixing that alone should significantly improve results.

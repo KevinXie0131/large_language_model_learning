@@ -14,3 +14,6 @@ git push origin main
 huggingface-cli download KevinXie0131/my_lora_finetuning_huanhuan_1
 huggingface-cli repo-files --token XXXXXXXXXXX KevinXie0131/my_lora_finetuning_huanhuan_1 delete optimizer.pt
 huggingface-cli upload --token XXXXXXXXXXX KevinXie0131/my_lora_finetuning_huanhuan_1 C:\LLM\test.txt
+
+
+ollama run hf.co/unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF:Q5_K_M
