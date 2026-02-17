@@ -11,3 +11,5 @@ Modelfile:
 FROM C:\Backup\QA\Llama-3.2-3B-Instruct-f16.gguf
 
 ollama create --quantize q4_K_M mymodel
+
+ollama run hf.co/unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF:Q5_K_M
