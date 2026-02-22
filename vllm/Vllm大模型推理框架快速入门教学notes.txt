@@ -1,0 +1,40 @@
+!pip install -U huggingface_hub
+
+!hf download Qwen/Qwen3-8B --local-dir qwen
+
+!pip install vllm
+
+!vllm serve qwen --api-key abc123 --served-model-name Qwen/Qwen3:8B --max_model_len 4096 --port 7890
+
+------------------------------------------------------------------------
+curl -X POST http://0.0.0.0:7890/v1/completions \
+  -H "Authorization: Bearer abc123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen3:8B",
+    "prompt": "who are you",
+    "max_tokens": 50
+  }'
+
+------------------------------------------------------------------------
+import requests
+
+url = f"http://0.0.0.0:7890/v1/models"
+headers = {"Authorization": "Bearer abc123"}
+response = requests.get(url, headers=headers)
+print(response.json())
+
+------------------------------------------------------------------------
+from openai import OpenAI
+client = OpenAI(
+    base_url=f"http://0.0.0.0:7890/v1", # http://localhost:7890/v1 works too
+    api_key="abc123",
+)
+
+completion = client.chat.completions.create(
+    model="Qwen/Qwen3:8B",            # 模型名称要和启动服务时设定的 served-model-name 参数一致
+    messages=[
+        {"role": "user", "content": "who are you"}
+    ]
+)
+print(completion.choices[0].message)

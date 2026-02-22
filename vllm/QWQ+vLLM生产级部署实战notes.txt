@@ -1,0 +1,37 @@
+from vllm import LLM, SamplingParams
+
+# 定义提示词和实例化采样参数
+prompts = [
+    "福建的省会城市是哪里",
+    "人工智能的英文是什么",
+    "who are you",
+    "22 + 11 - 9 = ?",
+    "write a poem in chinese",
+    "x+y=12. 2x+4y=34. what is x and y",
+    "translate i am happy to chinese",
+    "is 9.9 bigger than 9.11?",
+]
+sampling_params = SamplingParams(temperature=0.8, top_p=0.9, max_tokens=512)
+
+llm = LLM(
+    model="./qwen",
+    tensor_parallel_size=1,
+    max_model_len=4096,
+    enable_prefix_caching=True
+)
+
+# 调用llm.generate生成输出
+outputs = llm.generate(prompts, sampling_params)
+for output in outputs:
+    prompt = output.prompt
+    generated_text = output.outputs[0].text
+    print(f"提示词：{prompt!r}, 生成文本：{generated_text!r}")
+
+----------------------------------------------------------------------
+# 清理GPU显存
+import gc
+import torch
+
+del llm
+gc.collect()
+torch.cuda.empty_cache()
