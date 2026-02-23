@@ -7,6 +7,11 @@
 !vllm serve qwen --api-key abc123 --served-model-name Qwen/Qwen3:8B --max_model_len 4096 --port 7890
 
 ------------------------------------------------------------------------
+nohup vllm serve qwen --api-key abc123 --served-model-name Qwen/Qwen3:8B --max_model_len 4096 --port 7890 &
+tail -f nohup.out
+ps -ef | grep vllm
+
+------------------------------------------------------------------------
 curl -X POST http://0.0.0.0:7890/v1/completions \
   -H "Authorization: Bearer abc123" \
   -H "Content-Type: application/json" \
@@ -38,3 +43,21 @@ completion = client.chat.completions.create(
     ]
 )
 print(completion.choices[0].message)
+
+-----------------------------------------------------------------------
+# extra_body can be added
+completion = client.chat.completions.create(
+    model="Qwen/Qwen3:8B",            # 模型名称要和启动服务时设定的 served-model-name 参数一致
+    messages=[
+        {"role": "user", "content": "who are you"}
+    ],
+    extra_body={
+    "temperature": 0.5,
+    "top_p": 0.9,
+    "top_k": 10,
+    "max_tokens": 200,
+    "repetition_penalty": 1.0,
+    "length_penalty": 1.0,
+   # "stop": ["\n"]
+}
+)
