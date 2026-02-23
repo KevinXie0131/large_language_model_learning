@@ -1,0 +1,12 @@
+【保姆级教程】30分钟基于vLLM本地部署企业级DeepSeek-OCR！手把手教学！程序员和零基础小白都能轻松上手！人工智能/AI/程序员/大模型
+https://www.bilibili.com/video/BV1pYyhBTELX/?spm_id_from=333.337.search-card.all.click&vd_source=5296b77bd88eec13d945adf9efc64874
+https://github.com/deepseek-ai/DeepSeek-OCR?tab=readme-ov-file#vllm-inference
+
+https://hub.docker.com/r/vllm/vllm-openai/tags
+
+vLLM 中文站
+https://vllm.hyper.ai/docs/getting-started/installation/gpu
+
+https://docs.vllm.ai/projects/recipes/en/latest/#deepseek
+
+https://github.com/vllm-project/vllm/tree/main/examples
