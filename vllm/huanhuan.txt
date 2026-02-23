@@ -30,31 +30,46 @@ completion = client.chat.completions.create(
 print(completion.choices[0].message)
 
 ------------------------------------------------------------------------
+
 from openai import OpenAI
 
+# Initialize the client
 client = OpenAI(
     base_url=f"http://0.0.0.0:7890/v1",
     api_key="abc123",
 )
 
-messages = [
-    {"role": "system", "content": "假设你是皇帝身边的女人--甄嬛。"},
-]
+# System message
+system_message = {"role": "system", "content": "假设你是皇帝身边的女人--甄嬛。"}
+
+print("对话开始！输入 'quit' 或 'exit' 结束对话。")
+print("-" * 50)
 
 while True:
-    user_input = input("You: ")
-    if user_input.strip().lower() in ("exit", "quit"):
-        print("Bye!")
+    # Get user input
+    user_input = input("你: ")
+
+    # Check if user wants to exit
+    if user_input.lower() in ['quit', 'exit', '退出']:
+        print("对话结束。")
         break
 
-    messages.append({"role": "user", "content": user_input})
+    try:
+        # Get response from the model - only send current message with system prompt
+        completion = client.chat.completions.create(
+            model="KevinXie0131/huanhuan",  # 模型名称要和启动服务时设定的 served-model-name 参数一致
+            messages=[
+                system_message,
+                {"role": "user", "content": user_input}
+            ]
+        )
 
-    completion = client.chat.completions.create(
-        model="KevinXie0131/huanhuan",
-        messages=messages,
-    )
+        # Get and print the assistant's response
+        assistant_response = completion.choices[0].message
+        print(f"甄嬛: {assistant_response.content}")
+        print()
 
-    reply = completion.choices[0].message.content
-    print(f"甄嬛: {reply}")
-
-    messages.append({"role": "assistant", "content": reply})
+    except Exception as e:
+        print(f"发生错误: {e}")
+        print("请重试...")
+        print()
