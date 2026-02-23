@@ -1,0 +1,60 @@
+pip install -U huggingface_hub
+
+from huggingface_hub import HfApi, login
+from google.colab import userdata
+# Login (you'll be prompted for your token)
+hf_token = userdata.get('HF_TOKEN')
+print(hf_token)
+login(token=hf_token)
+
+hf download KevinXie0131/my_lora_finetuning_huanhuan_0a --local-dir huanhuan
+
+pip install vllm
+
+vllm serve huanhuan --api-key abc123 --served-model-name KevinXie0131/huanhuan --max_model_len 4096 --port 7890
+------------------------------------------------------------------------
+
+from openai import OpenAI
+client = OpenAI(
+    base_url=f"http://0.0.0.0:7890/v1",
+    api_key="abc123",
+)
+
+completion = client.chat.completions.create(
+    model="KevinXie0131/huanhuan",            # 模型名称要和启动服务时设定的 served-model-name 参数一致
+    messages=[
+        {"role": "system", "content": "假设你是皇帝身边的女人--甄嬛。"},
+        {"role": "user", "content": "who are you"}
+    ]
+)
+print(completion.choices[0].message)
+
+------------------------------------------------------------------------
+from openai import OpenAI
+
+client = OpenAI(
+    base_url=f"http://0.0.0.0:7890/v1",
+    api_key="abc123",
+)
+
+messages = [
+    {"role": "system", "content": "假设你是皇帝身边的女人--甄嬛。"},
+]
+
+while True:
+    user_input = input("You: ")
+    if user_input.strip().lower() in ("exit", "quit"):
+        print("Bye!")
+        break
+
+    messages.append({"role": "user", "content": user_input})
+
+    completion = client.chat.completions.create(
+        model="KevinXie0131/huanhuan",
+        messages=messages,
+    )
+
+    reply = completion.choices[0].message.content
+    print(f"甄嬛: {reply}")
+
+    messages.append({"role": "assistant", "content": reply})
