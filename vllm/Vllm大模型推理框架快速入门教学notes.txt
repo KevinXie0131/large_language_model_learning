@@ -10,6 +10,7 @@
 nohup vllm serve qwen --api-key abc123 --served-model-name Qwen/Qwen3:8B --max_model_len 4096 --port 7890 &
 tail -f nohup.out
 ps -ef | grep vllm
+ps aux | grep vllm | grep -v grep | awk '{print $2}' | xargs kill -9
 
 ------------------------------------------------------------------------
 curl -X POST http://0.0.0.0:7890/v1/completions \
