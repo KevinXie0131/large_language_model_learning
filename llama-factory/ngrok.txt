@@ -10,3 +10,13 @@ public_url = ngrok.connect(7860)
 print(public_url)
 # NgrokTunnel: "https://c2a5-136-110-48-110.ngrok-free.app" -> "http://localhost:7860"
 
+----------------------------------------------------------
+!nvidia-smi -l
+
+!pip install nvitop
+!pip install nvidia-ml-py -U
+
+!nvitop -m auto
+!nvitop -m compact
+!nvitop -m full
+
