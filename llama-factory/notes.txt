@@ -8,3 +8,9 @@ pip install -e .
 pip install -r requirements/metrics.txt
 
 llamafactory-cli version
+
+llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
+llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
+llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
+
+llamafactory-cli webui

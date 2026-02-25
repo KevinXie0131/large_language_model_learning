@@ -1,0 +1,12 @@
+!pip install pyngrok
+
+# https://dashboard.ngrok.com/get-started/your-authtoken
+!ngrok config add-authtoken #############
+
+----------------------------------------------------------
+from pyngrok import ngrok
+
+public_url = ngrok.connect(7860)
+print(public_url)
+# NgrokTunnel: "https://c2a5-136-110-48-110.ngrok-free.app" -> "http://localhost:7860"
+
