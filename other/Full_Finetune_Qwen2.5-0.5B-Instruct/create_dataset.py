@@ -2,7 +2,6 @@ import pandas as pd
 import pickle
 from sklearn.model_selection import train_test_split
 import numpy as np
-import matplotlib.pyplot as plt
 from collections import Counter
 
 
@@ -50,8 +49,10 @@ def demo():
     test_data  = test_data.to_dict(orient='records')
 
     # 数据本地存储
-    pickle.dump(train_data, open('weibo_senti_100k/01-训练集.pkl', 'wb'))
-    pickle.dump(test_data,  open('weibo_senti_100k/02-测试集.pkl', 'wb'))
+    with open('weibo_senti_100k/01-训练集.pkl', 'wb') as f:
+        pickle.dump(train_data, f)
+    with open('weibo_senti_100k/02-测试集.pkl', 'wb') as f:
+        pickle.dump(test_data, f)
 
 
 if __name__ == '__main__':
