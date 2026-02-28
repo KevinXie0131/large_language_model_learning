@@ -15,9 +15,9 @@ def train():
     # 加载数据
     data = pickle.load(open('train.pkl', 'rb'))
     # 训练参数
-    epochs = 100
+    epochs = 200
     estimator = MyLinearRegression.MyLinearRegression()
-    optimizer = MySGD.MySGD(estimator.get_parameters(), lr=1e-2)
+    optimizer = MySGD.MySGD(estimator.get_parameters(), lr=1e-3)
     criterion = MySquareLoss.MySquareLoss()
 
     epoch_loss = []

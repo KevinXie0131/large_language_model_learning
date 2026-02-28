@@ -16,4 +16,5 @@ class MyDataLoader:
         for idx in range(batch_number):
             start = idx * self.batch_size
             end = start + self.batch_size
-            yield self.X[start:end], self.y[start:end]
+            batch_indices = data_index[start:end]
+            yield self.X[batch_indices], self.y[batch_indices]

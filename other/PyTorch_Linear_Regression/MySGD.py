@@ -5,8 +5,9 @@ class MySGD:
 
     def step(self):
         for name, param in self.parameters.items():
-            param.data = param.data - self.lr * param.grad.data / 16
+            param.data = param.data - self.lr * param.grad.data
 
     def zero_grad(self):
         for name, param in self.parameters.items():
-            param.data.zero_()
+            if param.grad is not None:
+                param.grad.zero_()
