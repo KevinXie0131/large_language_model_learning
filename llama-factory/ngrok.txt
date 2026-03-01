@@ -1,7 +1,7 @@
 !pip install pyngrok
 
 # https://dashboard.ngrok.com/get-started/your-authtoken
-!ngrok config add-authtoken 1UDCO4CFmJWuSuIqdO9vrQOe3Cb_2PdtAc588Basr23Aeq8XH
+!ngrok config add-authtoken ##################
 
 ----------------------------------------------------------
 from pyngrok import ngrok
