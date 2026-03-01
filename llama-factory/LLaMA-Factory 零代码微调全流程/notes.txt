@@ -1,0 +1,4 @@
+https://www.bilibili.com/video/BV1NvWxzZEqX/
+让 AI 更懂你的业务！LLaMA-Factory 零代码微调全流程：科研/工作党必看（全免费/保姆级/附文档）
+
+笔记与资源： https://gitee.com/leaveWhite9088/llamafactory-lora
