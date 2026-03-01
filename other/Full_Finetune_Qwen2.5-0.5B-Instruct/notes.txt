@@ -1,2 +1,5 @@
 https://mengbaoliang.cn/archives/108979/
 全量微调 Qwen2.5-0.5B-Instruct 分类任务
+
+预训练模型：https://huggingface.co/Qwen/Qwen2.5-0.5B
+微调数据集：https://huggingface.co/datasets/dirtycomputer/weibo_senti_100k

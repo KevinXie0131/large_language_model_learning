@@ -76,6 +76,7 @@ def demo():
     print('模型微调前: %.3f' % acc)
 
     model_path = './Qwen2.5-0.5B-Instruct-SFT/checkpoint-2500'
+ #   model_path = r'C:\Backup\Tech\large_language_model_learning\other\Full_Finetune_Qwen2.5-0.5B-Instruct\merged'
     acc = evaluate(model_path)
     print('模型微调后: %.3f' % acc)
 
