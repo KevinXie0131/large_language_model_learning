@@ -1,0 +1,7 @@
+https://mengbaoliang.cn/archives/114447/
+基于 llama-factory 大语言模型微调实战
+
+https://www.bilibili.com/video/BV15ZZuYMEc7/?spm_id_from=333.337.search-card.all.click
+
+预训练模型：https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct
+微调数据集：https://huggingface.co/datasets/dirtycomputer/weibo_senti_100k

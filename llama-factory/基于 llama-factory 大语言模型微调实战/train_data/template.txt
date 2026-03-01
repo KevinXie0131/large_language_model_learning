@@ -1,0 +1,6 @@
+{
+    "system": "你是一个情感分析助手。",
+    "instruction": "判断以下微博评论的情感倾向，回答【好评】或【差评】。",
+    "input": {{ input | tojson }},
+    "output": {{ output | tojson }}
+}
