@@ -19,3 +19,4 @@ llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 llamafactory-cli webui
 
 nohup llamafactory-cli webui > webui.log 2>&1 &
+tail -f webui.log
