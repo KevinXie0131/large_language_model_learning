@@ -1,0 +1,31 @@
+# ✅ 1. Download and Install Miniconda
+# Download Miniconda installer
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+# Install silently to /usr/local/miniconda
+bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/local/miniconda
+
+# ✅ 2. Add Conda to PATH
+export PATH="/usr/local/miniconda/bin:$PATH"
+conda --version
+
+# ✅ 3. Initialize Conda (Optional but Recommended)
+conda init bash
+source ~/.bashrc
+
+# ✅ 4. Create a Conda Environment
+conda create -n myenv python=3.10 -y
+
+# ✅ 5. Activate the Environment
+source /usr/local/miniconda/bin/activate myenv
+python --version
+
+# ✅ 6. Install Packages in Conda Env
+pip install torch transformers
+
+# ✅ 7. Use Conda Environment in Python Kernel (Important)
+source /usr/local/miniconda/bin/activate myenv
+pip install ipykernel
+
+python -m ipykernel install --user --name myenv --display-name "Python (myenv)"
+
+Runtime → Change runtime type → Kernel → Python (myenv)

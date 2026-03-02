@@ -10,3 +10,38 @@ https://vllm.hyper.ai/docs/getting-started/installation/gpu
 https://docs.vllm.ai/projects/recipes/en/latest/#deepseek
 
 https://github.com/vllm-project/vllm/tree/main/examples
+
+
+方法一：使用环境变量（推荐）
+在执行 vLLM 命令之前，先设置环境变量：
+# 先设置 Hugging Face token 环境变量
+export HF_TOKEN="XXXXXXXXXXXXXXXXXX"
+
+# 然后运行 vLLM
+vllm serve Qwen/Qwen2.5-7B-Instruct \
+  --api-key abc123 \
+  --served-model-name qwen \
+  --max_model_len 4096 \
+  --port 7890
+
+或者可以在一行中完成：
+HF_TOKEN="XXXXXXXXXXXXXXXXXX" vllm serve Qwen/Qwen2.5-7B-Instruct --api-key abc123 --served-model-name qwen --max_model_len 4096 --port 7890
+
+方法二：使用 huggingface-cli 登录（适合持久化）
+# 安装 huggingface-hub (如果还没安装)
+pip install huggingface-hub
+
+# 登录（这会保存 token 到缓存目录）
+huggingface-cli login --token XXXXXXXXXXXXXXXXXX
+
+# 然后运行 vLLM，它会自动使用保存的 token
+vllm serve Qwen/Qwen2.5-7B-Instruct --api-key abc123 --served-model-name qwen --max_model_len 4096 --port 7890
+
+方法三：在 Python 代码中设置（如果是通过 Python 调用）
+如果你是在 Python 脚本中使用 vLLM：
+import os
+os.environ["HF_TOKEN"] = "XXXXXXXXXXXXXXXXXX"
+
+# 然后导入并使用 vLLM
+from vllm import LLM
+# ... 你的代码
