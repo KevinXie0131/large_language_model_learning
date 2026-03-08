@@ -1,0 +1,4 @@
+root@autodl-container-2e27408749-268bdc6c:~/LLaMA-Factory# vim scripts/stat_utils/length_cdf.py
+
+root@autodl-container-2e27408749-268bdc6c:~/LLaMA-Factory# torchrun --nproc_per_node=1 scripts/stat_utils/length_cdf.py
+--model_name_or_path /root/autodl-tmp/Qwen/Qwen2.5-7B-Instruct --dataset security --dataset_dir data --template qwen
