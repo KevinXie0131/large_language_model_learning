@@ -2,3 +2,11 @@ root@autodl-container-2e27408749-268bdc6c:~/LLaMA-Factory# vim scripts/stat_util
 
 root@autodl-container-2e27408749-268bdc6c:~/LLaMA-Factory# torchrun --nproc_per_node=1 scripts/stat_utils/length_cdf.py
 --model_name_or_path /root/autodl-tmp/Qwen/Qwen2.5-7B-Instruct --dataset security --dataset_dir data --template qwen
+
+
+在本地微调任务中，我们将使用 Easy Dataset（简称 EDS）来构造数据集，以下是我们的构造思路：
+为确保模型能学习到专业的 Web 安全知识，我们选择从 Web 安全领域的专业书籍《白帽子讲 Web 安全》来提取部分数据集；
+为确保模型能学习到 Web 安全领域最前沿的知识，我们精选几篇 Web 安全相关的最新论文来提取部分数据集：
+《The Hidden Risks of LLM-Generated Web Application Code: A Security-Centric Evaluation of Code Generation Capabilities in Large Language Models》
+《WASP: Benchmarking Web Agent Security Against Prompt Injection Attacks》
+《A Human Study of Cognitive Biases in Web Application Security》
