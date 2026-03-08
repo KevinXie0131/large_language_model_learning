@@ -10,3 +10,6 @@ root@autodl-container-2e27408749-268bdc6c:~/LLaMA-Factory# torchrun --nproc_per_
 《The Hidden Risks of LLM-Generated Web Application Code: A Security-Centric Evaluation of Code Generation Capabilities in Large Language Models》
 《WASP: Benchmarking Web Agent Security Against Prompt Injection Attacks》
 《A Human Study of Cognitive Biases in Web Application Security》
+
+Easy Dataset × LLaMA Factory: 让大模型高效学习领域知识
+https://buaa-act.feishu.cn/wiki/KY9xwTGs1iqHrRkjXBwcZP9WnL9
