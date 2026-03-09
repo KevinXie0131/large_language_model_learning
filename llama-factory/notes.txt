@@ -51,3 +51,13 @@ curl -s http://localhost:8000/v1/chat/completions -H "Content-Type: application/
 
 路径：examples/merge_lora/llama3_lora_sft.yaml
 llamafactory-cli export examples/merge_lora/llama3_lora_sft.yaml
+
+--------------------------------------------------------------------
+LLaMA Factory 项目代码指南
+https://blog.llamafactory.net/posts/project_guide/
+
+LLaMA-Factory QuickStart
+https://zhuanlan.zhihu.com/p/695287607
+
+使用 LlamaFactory 微调最新一代 Qwen3.5 模型辨别人形机器人型号
+https://blog.llamafactory.net/posts/qwen3_5_finetuning/
