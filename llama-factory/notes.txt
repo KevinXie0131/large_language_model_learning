@@ -61,3 +61,8 @@ https://zhuanlan.zhihu.com/p/695287607
 
 使用 LlamaFactory 微调最新一代 Qwen3.5 模型辨别人形机器人型号
 https://blog.llamafactory.net/posts/qwen3_5_finetuning/
+
+用户指南篇 – KTransformers 微调 × LLaMA-Factory 集成
+https://swcil84qspu.feishu.cn/wiki/Z1sSwb2poijybxkyPEkcDG6enVc
+KTransformers 联合 LLaMA-Factory 进行 RL-DPO 训练
+https://blog.llamafactory.net/posts/ktransformers_dpo/
