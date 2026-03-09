@@ -53,6 +53,9 @@ curl -s http://localhost:8000/v1/chat/completions -H "Content-Type: application/
 llamafactory-cli export examples/merge_lora/llama3_lora_sft.yaml
 
 --------------------------------------------------------------------
+LLaMA Factory Docs
+https://llamafactory.readthedocs.io/zh-cn/latest/
+
 LLaMA Factory 项目代码指南
 https://blog.llamafactory.net/posts/project_guide/
 
