@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "xuanyuan-universe": {
+      "disabled": false,
+      "url": "http://localhost:8000/sse",
+      "transportType": "sse"
+    }
+  }
+}
