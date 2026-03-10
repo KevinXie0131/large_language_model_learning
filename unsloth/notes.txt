@@ -1,0 +1,7 @@
+
+2.2「实战」大模型微调：使用 Unsloth 微调 DeepSeek R1
+https://my.feishu.cn/wiki/U9rYwRHQoil6vBkitY8cbh5tnL9
+
+dataset: https://huggingface.co/datasets/Conard/fortune-telling
+
+trained_model: https://huggingface.co/Conard/fortunetelling
