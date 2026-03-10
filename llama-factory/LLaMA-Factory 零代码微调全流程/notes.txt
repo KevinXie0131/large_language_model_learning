@@ -2,3 +2,10 @@ https://www.bilibili.com/video/BV1NvWxzZEqX/
 让 AI 更懂你的业务！LLaMA-Factory 零代码微调全流程：科研/工作党必看（全免费/保姆级/附文档）
 
 笔记与资源： https://gitee.com/leaveWhite9088/llamafactory-lora
+
+model: DeepSeek-R1-Distill-Qwen-7B
+dataset: https://huggingface.co/datasets/Skepsun/lawyer_llama_data
+
+
+# 使用 sed 命令进行原地替换，将文件中的 "prefix" 替换为 "system"
+sed -i 's/"prefix"/"system"/g' "./lawyer_llama.json"
