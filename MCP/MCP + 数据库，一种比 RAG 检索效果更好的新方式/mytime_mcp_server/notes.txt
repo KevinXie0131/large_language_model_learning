@@ -1,0 +1,17 @@
+
+npm init -y
+
+npm install @modelcontextprotocol/sdk zod
+npm install -D typescript @types/node ts-node
+
+
+{
+  "mcpServers": {
+    "mytime": {
+      "command": "node",
+      "args": [
+        "C:\\Backup\\Node\\server.ts"
+      ]
+    }
+  }
+}

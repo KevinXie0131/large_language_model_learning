@@ -1,2 +1,41 @@
 https://mp.weixin.qq.com/s/jV46NMDfcJRiklUG_RLsmQ?token=326526331&lang=zh_CN
 MCP + 数据库，一种比 RAG 检索效果更好的新方式！
+
+https://juejin.cn/post/7493455615244959794
+全网最细，一文带你弄懂 MCP 的核心原理！
+echo {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"directory_tree","arguments":{"path":"C:\\Backup\\Node"}}} | npx -y @modelcontextprotocol/server-filesystem C:\Backup\Node
+
+Linux 下的配置
+{
+  "mcpServers": {
+    "mongodb": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "~/Downloads"
+      ]
+    }
+  }
+}
+Windows 下的配置
+{
+  "mcpServers": {
+    "mongodb": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "~/Downloads"
+      ]
+    }
+  }
+}
+
+
+https://modelcontextprotocol.io/llms-full.txt
+
+npx @modelcontextprotocol/inspector npx -y @modelcontextprotocol/server-filesystem  ～/Downloads
+npx @modelcontextprotocol/inspector npx -y @modelcontextprotocol/server-filesystem C:\\Backup\\Node
