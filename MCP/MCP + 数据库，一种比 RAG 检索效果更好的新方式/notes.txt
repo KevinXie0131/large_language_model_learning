@@ -1,0 +1,2 @@
+https://mp.weixin.qq.com/s/jV46NMDfcJRiklUG_RLsmQ?token=326526331&lang=zh_CN
+MCP + 数据库，一种比 RAG 检索效果更好的新方式！

@@ -1,0 +1,90 @@
+使用中文回复。
+
+当用户提问中涉及学生、教师、成绩、班级、课程等实体时，需要使用 MongoDB MCP 进行数据查询和操作，表结构说明如下：
+
+# 学生管理系统数据库表结构说明
+
+## 1. 教师表 (teachers)
+
+| 字段名 | 类型 | 描述 | 约束 | 示例 |
+|--------|------|------|------|------|
+| _id | String | 教师ID | 主键 | "T001" |
+| name | String | 教师姓名 | 必填 | "张建国" |
+| gender | String | 性别 | "男"或"女" | "男" |
+| subject | String | 教授科目 | 必填 | "数学" |
+| title | String | 职称 | 必填 | "教授" |
+| contact.phone | String | 联系电话 | 必填 | "13812345678" |
+| contact.office | String | 办公室位置 | 必填 | "博学楼301" |
+| contact.wechat | String | 微信(可选) | 可选 | "lily_teacher" |
+| isHeadTeacher | Boolean | 是否为班主任 | 可选 | true |
+
+## 2. 班级表 (classes)
+
+| 字段名 | 类型 | 描述 | 约束 | 示例 |
+|--------|------|------|------|------|
+| _id | String | 班级ID | 主键 | "202301" |
+| className | String | 班级名称 | 必填 | "2023级计算机1班" |
+| grade | Number | 年级 | 必填 | 2023 |
+| headTeacherId | String | 班主任ID | 外键(teachers._id) | "T003" |
+| classroom | String | 教室位置 | 必填 | "1号楼302" |
+| studentCount | Number | 学生人数 | 必填 | 35 |
+| remark | String | 备注信息 | 可选 | "市级优秀班集体" |
+
+## 3. 课程表 (courses)
+
+| 字段名 | 类型 | 描述 | 约束 | 示例 |
+|--------|------|------|------|------|
+| _id | String | 课程ID | 主键 | "C001" |
+| courseName | String | 课程名称 | 必填 | "高等数学" |
+| credit | Number | 学分 | 必填 | 4 |
+| teacherId | String | 授课教师ID | 外键(teachers._id) | "T001" |
+| semester | String | 学期 | 格式"YYYY-N" | "2023-1" |
+| type | String | 课程类型 | "必修"或"选修" | "必修" |
+| prerequisite | String | 先修课程ID | 可选,外键(courses._id) | "C003" |
+
+## 4. 学生表 (students)
+
+| 字段名 | 类型 | 描述 | 约束 | 示例 |
+|--------|------|------|------|------|
+| _id | String | 学号 | 主键 | "S20230101" |
+| name | String | 学生姓名 | 必填 | "王强" |
+| gender | String | 性别 | "男"或"女" | "男" |
+| birthDate | Date | 出生日期 | 必填 | new Date("2005-01-15") |
+| enrollmentDate | Date | 入学日期 | 必填 | new Date(2023, 8, 1) |
+| classId | String | 班级ID | 外键(classes._id) | "202301" |
+| contact.phone | String | 联系电话 | 必填 | "13812345678" |
+| contact.email | String | 电子邮箱 | 必填 | "20230101@school.edu.cn" |
+| contact.emergencyContact | String | 紧急联系人电话 | 必填 | "13876543210" |
+| address | String | 家庭住址 | 必填 | "北京市海淀区中关村大街1栋101室" |
+| profile.height | Number | 身高(cm) | 必填 | 175 |
+| profile.weight | Number | 体重(kg) | 必填 | 65 |
+| profile.healthStatus | String | 健康状况 | 必填 | "良好" |
+
+## 5. 成绩表 (scores)
+
+| 字段名 | 类型 | 描述 | 约束 | 示例 |
+|--------|------|------|------|------|
+| _id | String | 成绩记录ID | 主键 | "S20230101C001" |
+| studentId | String | 学生ID | 外键(students._id) | "S20230101" |
+| courseId | String | 课程ID | 外键(courses._id) | "C001" |
+| score | Number | 综合成绩 | 0-100 | 85 |
+| examDate | Date | 考试日期 | 必填 | new Date(2024, 5, 20) |
+| usualScore | Number | 平时成绩 | 70-100 | 90 |
+| finalScore | Number | 期末成绩 | 0-100 | 80 |
+
+### 补考成绩记录说明
+补考记录在_id后添加"_M"后缀，如"S20230101C001_M"
+
+## 表关系说明
+
+1. **一对多关系**:
+   - 一个班级(classes)对应多个学生(students)
+   - 一个教师(teachers)可以教授多门课程(courses)
+   - 一个学生(students)有多条成绩记录(scores)
+
+2. **外键约束**:
+   - students.classId → classes._id
+   - courses.teacherId → teachers._id
+   - scores.studentId → students._id
+   - scores.courseId → courses._id
+   - classes.headTeacherId → teachers._id
