@@ -10,8 +10,11 @@ npm install -D typescript @types/node ts-node
     "mytime": {
       "command": "node",
       "args": [
-        "C:\\Backup\\Node\\server.ts"
+        "C:\\Backup\\Node\\dist\\index.js"
       ]
     }
   }
 }
+
+
+https://github.com/ConardLi/mcp-client-nodejs
