@@ -1,0 +1,2 @@
+
+node build/index.js C:\\Backup\\Node\\create_mcp\\dist\\index.js

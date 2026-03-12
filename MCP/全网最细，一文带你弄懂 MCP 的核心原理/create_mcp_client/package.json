@@ -1,0 +1,28 @@
+{
+  "name": "mcp-client",
+  "version": "1.0.0",
+  "description": "基于 MCP 协议的 Node.js 客户端，使用 OpenAI SDK 兼容多种大语言模型",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "*",
+    "openai": "*",
+    "dotenv": "*"
+  },
+  "devDependencies": {
+    "@types/node": "*",
+    "typescript": "*"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "openai",
+    "llm",
+    "ai",
+    "chatbot"
+  ],
+  "license": "MIT"
+}
