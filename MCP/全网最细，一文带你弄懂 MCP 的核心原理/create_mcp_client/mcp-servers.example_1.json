@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+	"time": {
+      "command": "npx",
+      "args": [
+        "mcp-client",
+        "C:\\Backup\\Node\\create_mcp\\dist\\index.js"
+      ],
+      "description": "get current time 自定义 Node.js MCP服务器"
+    }
+  },
+  "defaultServer": "time",
+  "system": "使用中文回复。\n\n"
+}

@@ -16,5 +16,5 @@
     }
   },
   "defaultServer": "time",
-  "system": "这里填写系统提示词"
+  "system": "使用中文回复。\n\n"
 }
