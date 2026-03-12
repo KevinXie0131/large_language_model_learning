@@ -1,2 +1,6 @@
 
 node build/index.js C:\\Backup\\Node\\create_mcp\\dist\\index.js
+node build/index.js time mcp-servers.example.json
+
+npx mcp-client C:\\Backup\\Node\\create_mcp\\dist\\index.js
+npx mcp-client time mcp-servers.example.json

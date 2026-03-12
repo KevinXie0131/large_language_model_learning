@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * MCP Client - 基于 Model Context Protocol 的智能客户端
  *
@@ -9,6 +10,7 @@
  * 2. 将用户查询发送给 LLM，由 LLM 决定是否调用工具
  * 3. 执行工具调用并将结果返回给 LLM 生成最终回复
  * 4. 支持多轮对话和交互式聊天
+ * 5. 支持 JSON 配置文件管理多个 MCP 服务器
  *
  * 架构说明：
  * - 使用 @modelcontextprotocol/sdk 处理 MCP 协议通信
@@ -21,6 +23,8 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import readline from "readline/promises";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 
 import type {
   ChatCompletionMessageParam,
@@ -29,6 +33,47 @@ import type {
 
 // 加载环境变量配置
 dotenv.config();
+
+// ============================================================================
+// 类型定义
+// ============================================================================
+
+/**
+ * 单个 MCP 服务器的配置
+ * 与 Claude Desktop 的配置格式兼容
+ */
+interface MCPServerConfig {
+  /** 启动服务器的命令（如 node, npx, python 等） */
+  command: string;
+  /** 传递给命令的参数列表 */
+  args: string[];
+  /** 服务器描述（可选） */
+  description?: string;
+  /** 环境变量（可选） */
+  env?: Record<string, string>;
+}
+
+/**
+ * MCP 服务器配置文件的完整结构
+ *
+ * 示例：
+ * {
+ *   "mcpServers": {
+ *     "time": { "command": "node", "args": ["./server.js"] },
+ *     "mongodb": { "command": "npx", "args": ["mcp-mongo-server", "..."] }
+ *   },
+ *   "defaultServer": "time",
+ *   "system": "你是一个有用的助手"
+ * }
+ */
+interface MCPConfigFile {
+  /** MCP 服务器配置映射，键为服务器名称 */
+  mcpServers: Record<string, MCPServerConfig>;
+  /** 默认使用的服务器名称（可选） */
+  defaultServer?: string;
+  /** 系统提示词（可选） */
+  system?: string;
+}
 
 // ============================================================================
 // 环境变量校验
@@ -56,7 +101,7 @@ const MODEL_NAME = process.env.MODEL_NAME || "gpt-4o";
  * MCPClient - MCP 协议客户端
  *
  * 该类封装了 MCP 客户端的核心逻辑，包括：
- * - 与 MCP 服务器建立连接
+ * - 与 MCP 服务器建立连接（支持直接脚本路径或 JSON 配置文件）
  * - 发现并注册服务器提供的工具
  * - 通过 LLM 处理用户查询
  * - 执行工具调用并返回结果
@@ -78,6 +123,9 @@ class MCPClient {
   /** 多轮对话的消息历史记录 */
   private messageHistory: ChatCompletionMessageParam[] = [];
 
+  /** 系统提示词（从配置文件读取） */
+  private systemPrompt: string | null = null;
+
   constructor() {
     // 初始化 OpenAI 客户端
     this.openai = new OpenAI({
@@ -97,16 +145,76 @@ class MCPClient {
   // --------------------------------------------------------------------------
 
   /**
-   * 连接到 MCP 服务器
+   * 通过配置文件连接到指定的 MCP 服务器
+   *
+   * 从 JSON 配置文件中读取服务器配置，根据服务器名称找到对应配置，
+   * 然后通过 stdio 传输层建立连接。
+   *
+   * @param serverName - 要连接的服务器名称（配置文件中的键名）
+   * @param configPath - JSON 配置文件的路径
+   * @throws 当配置文件不存在、格式错误或服务器名称不存在时抛出错误
+   */
+  async connectFromConfig(serverName: string, configPath: string): Promise<void> {
+    try {
+      // 读取并解析配置文件
+      const absolutePath = path.resolve(configPath);
+      if (!fs.existsSync(absolutePath)) {
+        throw new Error(`配置文件不存在: ${absolutePath}`);
+      }
+
+      const configContent = fs.readFileSync(absolutePath, "utf-8");
+      const config: MCPConfigFile = JSON.parse(configContent);
+
+      if (!config.mcpServers) {
+        throw new Error("配置文件格式错误: 缺少 mcpServers 字段");
+      }
+
+      // 查找指定的服务器配置
+      const serverConfig = config.mcpServers[serverName];
+      if (!serverConfig) {
+        const available = Object.keys(config.mcpServers).join(", ");
+        throw new Error(
+          `未找到服务器 "${serverName}"，可用的服务器: ${available}`
+        );
+      }
+
+      // 读取系统提示词（如果配置了的话）
+      if (config.system) {
+        this.systemPrompt = config.system;
+      }
+
+      // 使用配置中的 command 和 args 创建传输层
+      console.log(`\n正在连接服务器 "${serverName}"...`);
+      if (serverConfig.description) {
+        console.log(`服务器描述: ${serverConfig.description}`);
+      }
+
+      // 构建环境变量：继承当前进程环境变量，并合并配置中指定的环境变量
+      const env = {
+        ...process.env,
+        ...(serverConfig.env || {}),
+      } as Record<string, string>;
+
+      this.transport = new StdioClientTransport({
+        command: serverConfig.command,
+        args: serverConfig.args.map((arg) => arg.trim()),
+        env,
+      });
+
+      // 建立 MCP 连接并获取工具列表
+      await this.mcp.connect(this.transport);
+      await this.fetchTools();
+    } catch (e) {
+      console.error("连接 MCP 服务器失败:", e);
+      throw e;
+    }
+  }
+
+  /**
+   * 直接通过脚本路径连接到 MCP 服务器
    *
    * 根据服务器脚本的类型（.js 或 .py）自动选择合适的运行命令，
-   * 通过 stdio 传输层建立与 MCP 服务器的连接，并获取可用的工具列表。
-   *
-   * MCP 连接生命周期：
-   * 1. 创建 stdio 传输层
-   * 2. 客户端与服务器握手（初始化 + 能力协商）
-   * 3. 获取服务器提供的工具列表
-   * 4. 将工具转换为 OpenAI 格式以供 LLM 使用
+   * 通过 stdio 传输层建立与 MCP 服务器的连接。
    *
    * @param serverScriptPath - MCP 服务器脚本的路径（支持 .js 和 .py 文件）
    * @throws 当脚本路径不是 .js 或 .py 文件时抛出错误
@@ -136,31 +244,40 @@ class MCPClient {
         args: [serverScriptPath],
       });
 
-      // 建立 MCP 连接（包含初始化握手和能力协商）
+      // 建立 MCP 连接并获取工具列表
       await this.mcp.connect(this.transport);
-
-      // 获取服务器提供的工具列表
-      const toolsResult = await this.mcp.listTools();
-
-      // 将 MCP 工具格式转换为 OpenAI 的 function calling 格式
-      // MCP 工具使用 inputSchema，而 OpenAI 使用 parameters
-      this.tools = toolsResult.tools.map((tool) => ({
-        type: "function" as const,
-        function: {
-          name: tool.name,
-          description: tool.description || "",
-          parameters: tool.inputSchema as Record<string, unknown>,
-        },
-      }));
-
-      console.log(
-        "\n已连接到 MCP 服务器，可用工具:",
-        this.tools.map((t) => t.function?.name)
-      );
+      await this.fetchTools();
     } catch (e) {
       console.error("连接 MCP 服务器失败:", e);
       throw e;
     }
+  }
+
+  /**
+   * 从 MCP 服务器获取可用工具列表，并转换为 OpenAI Function Calling 格式
+   *
+   * MCP 连接生命周期中的关键步骤：
+   * 1. 通过 tools/list 请求发现服务器提供的所有工具
+   * 2. 将 MCP 工具的 inputSchema 映射为 OpenAI 的 parameters 格式
+   */
+  private async fetchTools(): Promise<void> {
+    const toolsResult = await this.mcp.listTools();
+
+    // 将 MCP 工具格式转换为 OpenAI 的 function calling 格式
+    // MCP 工具使用 inputSchema，而 OpenAI 使用 parameters
+    this.tools = toolsResult.tools.map((tool) => ({
+      type: "function" as const,
+      function: {
+        name: tool.name,
+        description: tool.description || "",
+        parameters: tool.inputSchema as Record<string, unknown>,
+      },
+    }));
+
+    console.log(
+      "已连接到 MCP 服务器，可用工具:",
+      this.tools.map((t) => t.function?.name)
+    );
   }
 
   // --------------------------------------------------------------------------
@@ -192,11 +309,22 @@ class MCPClient {
       content: query,
     });
 
+    // 构建发送给 LLM 的消息列表
+    // 如果有系统提示词，则在消息列表最前面插入
+    const messages: ChatCompletionMessageParam[] = [];
+    if (this.systemPrompt) {
+      messages.push({
+        role: "system",
+        content: this.systemPrompt,
+      });
+    }
+    messages.push(...this.messageHistory);
+
     // 调用 LLM，附带可用工具列表
     const response = await this.openai.chat.completions.create({
       model: MODEL_NAME,
       max_completion_tokens: 4096,
-      messages: this.messageHistory,
+      messages,
       tools: this.tools.length > 0 ? this.tools : undefined,
     });
 
@@ -273,10 +401,19 @@ class MCPClient {
       }
 
       // 将工具结果发送给 LLM，让其生成最终的自然语言回复
+      const followUpMessages: ChatCompletionMessageParam[] = [];
+      if (this.systemPrompt) {
+        followUpMessages.push({
+          role: "system",
+          content: this.systemPrompt,
+        });
+      }
+      followUpMessages.push(...this.messageHistory);
+
       const followUp = await this.openai.chat.completions.create({
         model: MODEL_NAME,
         max_completion_tokens: 4096,
-        messages: this.messageHistory,
+        messages: followUpMessages,
       });
 
       const followUpMessage = followUp.choices[0].message;
@@ -317,6 +454,9 @@ class MCPClient {
       console.log(`当前模型: ${MODEL_NAME}`);
       if (OPENAI_BASE_URL) {
         console.log(`API 地址: ${OPENAI_BASE_URL}`);
+      }
+      if (this.systemPrompt) {
+        console.log(`系统提示词: ${this.systemPrompt.substring(0, 50)}${this.systemPrompt.length > 50 ? "..." : ""}`);
       }
       console.log('输入你的问题开始对话，输入 "quit" 退出，输入 "clear" 清除历史。\n');
 
@@ -382,35 +522,81 @@ class MCPClient {
 // ============================================================================
 
 /**
+ * 打印使用帮助
+ */
+function printUsage(): void {
+  console.log("MCP Client - 基于 MCP 协议的智能客户端\n");
+  console.log("用法:");
+  console.log("  node build/index.js <服务器名> <配置文件路径>   # 通过配置文件连接");
+  console.log("  node build/index.js <服务器脚本路径>            # 直接连接脚本\n");
+  console.log("示例:");
+  console.log("  node build/index.js time ./mcp-servers.json     # 连接配置文件中的 time 服务器");
+  console.log("  node build/index.js ./server/build/index.js     # 直接连接 Node.js 服务器");
+  console.log("  node build/index.js ./server/main.py            # 直接连接 Python 服务器\n");
+  console.log("配置文件格式（JSON）:");
+  console.log('  {');
+  console.log('    "mcpServers": {');
+  console.log('      "服务器名": {');
+  console.log('        "command": "node",');
+  console.log('        "args": ["./server.js"],');
+  console.log('        "description": "服务器描述"');
+  console.log("      }");
+  console.log("    },");
+  console.log('    "defaultServer": "服务器名",');
+  console.log('    "system": "系统提示词"');
+  console.log("  }");
+}
+
+/**
  * 程序主入口函数
  *
- * 解析命令行参数，创建 MCP 客户端实例，连接到指定的 MCP 服务器，
- * 并启动交互式聊天循环。
+ * 支持两种运行模式：
  *
- * 使用方式：
- *   node build/index.js <MCP服务器脚本路径>
+ * 模式一：配置文件模式
+ *   node build/index.js <服务器名> <配置文件路径>
+ *   从 JSON 配置文件中读取指定服务器的配置并连接
  *
- * 示例：
- *   node build/index.js ./server/build/index.js   # 连接 Node.js MCP 服务器
- *   node build/index.js ./server/main.py           # 连接 Python MCP 服务器
+ * 模式二：直接脚本模式
+ *   node build/index.js <服务器脚本路径>
+ *   直接指定 .js 或 .py 脚本路径进行连接
  */
 async function main(): Promise<void> {
   // 校验命令行参数
   if (process.argv.length < 3) {
-    console.log("用法: node build/index.js <MCP服务器脚本路径>");
-    console.log("");
-    console.log("示例:");
-    console.log("  node build/index.js ./server/build/index.js   # Node.js 服务器");
-    console.log("  node build/index.js ./server/main.py           # Python 服务器");
+    printUsage();
     process.exit(1);
   }
 
-  const serverScriptPath = process.argv[2];
   const mcpClient = new MCPClient();
 
   try {
-    // 连接到 MCP 服务器
-    await mcpClient.connectToServer(serverScriptPath);
+    const firstArg = process.argv[2];
+    const secondArg = process.argv[3];
+
+    // 判断运行模式：
+    // 如果有第二个参数且是 .json 文件，则使用配置文件模式
+    // 如果第一个参数是 .js 或 .py 文件，则使用直接脚本模式
+    if (secondArg && secondArg.endsWith(".json")) {
+      // 模式一：配置文件模式
+      await mcpClient.connectFromConfig(firstArg, secondArg);
+    } else if (firstArg.endsWith(".js") || firstArg.endsWith(".py")) {
+      // 模式二：直接脚本模式
+      await mcpClient.connectToServer(firstArg);
+    } else {
+      // 尝试将第一个参数当作服务器名，查找当前目录下的配置文件
+      // 如果第二个参数存在但不是 .json，也尝试当作配置文件路径
+      if (secondArg) {
+        await mcpClient.connectFromConfig(firstArg, secondArg);
+      } else {
+        console.error(
+          `错误: 无法识别参数 "${firstArg}"。\n` +
+          "如果是脚本文件，请确保扩展名为 .js 或 .py。\n" +
+          "如果是服务器名，请同时提供配置文件路径。\n"
+        );
+        printUsage();
+        process.exit(1);
+      }
+    }
 
     // 启动交互式聊天
     await mcpClient.chatLoop();

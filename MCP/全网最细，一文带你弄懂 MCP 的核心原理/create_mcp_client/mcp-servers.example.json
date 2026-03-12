@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "mongodb": {
+      "command": "npx",
+      "args": [
+        "mcp-mongo-server",
+        "mongodb://localhost:27017/studentManagement?authSource=admin"
+      ]
+    },
+	"time": {
+      "command": "node",
+      "args": [
+        " C:\\Backup\\Node\\create_mcp\\dist\\index.js"
+      ],
+      "description": "get current time 自定义 Node.js MCP服务器"
+    }
+  },
+  "defaultServer": "time",
+  "system": "这里填写系统提示词"
+}

@@ -112,17 +112,88 @@ npm run build
 
 5. **运行客户端**
 
-```bash
-# 连接 Node.js MCP 服务器
-node build/index.js path/to/server/build/index.js
+本客户端支持两种运行模式：
 
-# 连接 Python MCP 服务器
-node build/index.js path/to/server/main.py
+**模式一：配置文件模式（推荐）**
+
+```bash
+node build/index.js <服务器名> <配置文件路径>
 ```
+
+**模式二：直接脚本模式**
+
+```bash
+node build/index.js <服务器脚本路径>
+```
+
+## 配置文件
+
+推荐使用 JSON 配置文件管理 MCP 服务器，格式兼容 Claude Desktop 的配置风格。
+
+创建 `mcp-servers.json`：
+
+```json
+{
+  "mcpServers": {
+    "time": {
+      "command": "node",
+      "args": ["C:/path/to/time-server/dist/index.js"],
+      "description": "获取当前时间的 MCP 服务器"
+    },
+    "mongodb": {
+      "command": "npx",
+      "args": ["mcp-mongo-server", "mongodb://localhost:27017/mydb"],
+      "description": "MongoDB 数据库操作"
+    },
+    "weather": {
+      "command": "python",
+      "args": ["C:/path/to/weather-server/main.py"],
+      "env": {
+        "WEATHER_API_KEY": "your-weather-api-key"
+      }
+    }
+  },
+  "defaultServer": "time",
+  "system": "你是一个有用的 AI 助手，请用中文回复。"
+}
+```
+
+### 配置字段说明
+
+| 字段 | 说明 |
+|------|------|
+| `mcpServers` | 服务器配置映射，键为服务器名称 |
+| `mcpServers.*.command` | 启动服务器的命令（如 `node`, `npx`, `python`） |
+| `mcpServers.*.args` | 传递给命令的参数列表 |
+| `mcpServers.*.description` | 服务器描述（可选） |
+| `mcpServers.*.env` | 额外的环境变量（可选，会与当前环境变量合并） |
+| `defaultServer` | 默认使用的服务器名称（可选） |
+| `system` | 系统提示词，用于指导 LLM 的行为（可选） |
 
 ## 使用示例
 
-### 启动客户端
+### 通过配置文件连接
+
+```bash
+$ node build/index.js time ./mcp-servers.json
+
+正在连接服务器 "time"...
+服务器描述: 获取当前时间的 MCP 服务器
+已连接到 MCP 服务器，可用工具: [ 'get_current_time' ]
+
+=== MCP 客户端已启动 ===
+当前模型: gpt-4o
+系统提示词: 你是一个有用的 AI 助手，请用中文回复。
+输入你的问题开始对话，输入 "quit" 退出，输入 "clear" 清除历史。
+
+你: 现在几点了？
+
+[调用工具 get_current_time，参数: {}]
+
+助手: 现在是 2025 年 3 月 12 日下午 4:30。
+```
+
+### 直接连接脚本
 
 ```bash
 $ node build/index.js ./weather-server/build/index.js
@@ -209,14 +280,15 @@ $ node build/index.js ./weather-server/build/index.js
 ```
 create_mcp_client/
 ├── src/
-│   └── index.ts          # 主要源代码（MCP 客户端实现）
-├── build/                # 编译输出目录（自动生成）
-├── package.json          # 项目配置和依赖
-├── tsconfig.json         # TypeScript 编译配置
-├── .env.example          # 环境变量示例
-├── .env                  # 环境变量配置（需自行创建）
-├── .gitignore            # Git 忽略规则
-└── README.md             # 项目说明文档
+│   └── index.ts              # 主要源代码（MCP 客户端实现）
+├── build/                    # 编译输出目录（自动生成）
+├── mcp-servers.example.json  # MCP 服务器配置文件示例
+├── package.json              # 项目配置和依赖
+├── tsconfig.json             # TypeScript 编译配置
+├── .env.example              # 环境变量示例
+├── .env                      # 环境变量配置（需自行创建）
+├── .gitignore                # Git 忽略规则
+└── README.md                 # 项目说明文档
 ```
 
 ## 常见问题

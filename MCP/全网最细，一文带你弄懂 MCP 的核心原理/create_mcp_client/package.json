@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "基于 MCP 协议的 Node.js 客户端，使用 OpenAI SDK 兼容多种大语言模型",
   "main": "build/index.js",
+  "bin": {
+    "mcp-client": "build/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node build/index.js"
