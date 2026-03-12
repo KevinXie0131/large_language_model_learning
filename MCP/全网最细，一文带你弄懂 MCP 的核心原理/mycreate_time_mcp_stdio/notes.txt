@@ -1,0 +1,32 @@
+
+● 项目已构建完成。结构如下：
+  create_mcp/
+  ├── src/
+  │   └── index.ts          # MCP Server 源码
+  ├── dist/
+  │   └── index.js          # 编译产物
+  ├── package.json
+  └── tsconfig.json
+  核心功能：
+  - 注册了一个 get_current_time 工具
+  - 接收可选的 timezone 参数（IANA 格式，如 Asia/Shanghai）
+  - 不传时区则使用系统本地时区
+  - 使用 Intl.DateTimeFormat 处理时区转换，无需额外依赖
+  - 通过 stdio 传输与 MCP Client 通信
+
+
+npm install
+npm run build
+
+npx @modelcontextprotocol/inspector node dist/index.js
+
+使用方式： 在 MCP Client 配置中添加：
+
+{
+"mcpServers": {
+  "time-server": {
+    "command": "node",
+    "args": ["C:\\Backup\\Node\\create_mcp\\dist\\index.js"]
+  }
+}
+}
