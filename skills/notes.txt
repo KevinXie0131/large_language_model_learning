@@ -1,0 +1,12 @@
+
+帮我创建一个可以准确获取当前系统时间的 Skill，描述使用中文，脚本使用 Node.js。
+
+
+创建的文件：
+
+- .claude/skills/current-time/SKILL.md — 技能定义，包含中文描述和使用说明
+- .claude/skills/current-time/scripts/get-time.js — Node.js 脚本，输出 JSON 格式的详细时间信息
+
+触发场景： 当你问"现在几点"、"今天几号"、"今天星期几"、"当前时间"等问题时会自动触发。
+
+输出内容： 完整日期时间、星期、时区、Unix 时间戳、ISO 格式等，Claude 会根据你的具体问题用自然语言回复相关部分。
