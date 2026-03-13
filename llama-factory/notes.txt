@@ -21,23 +21,17 @@ llamafactory-cli webui
 nohup llamafactory-cli webui > webui.log 2>&1 &
 tail -f webui.log
 
+python scripts/vllm_infer.py --model_name_or_path /content/saves/qwen3_sft_merged --dataset alpaca_en_demo
 
-
+--------------------------------------------------------------------
 (llama_factory) mylinux@DESKTOP-5JPN8FV:/mnt/c/Learning/LLaMA-Factory$ CUDA_VISIBLE_DEVICES=0 GRADIO_SHARE=1 GRADIO_SERVER_POR
 T=7860 llamafactory-cli webui
 Running on local URL:  http://0.0.0.0:7860
 Running on public URL: https://203af6b867d39d18cd.gradio.live
 
-
 --------------------------------------------------------------------
-llamafactory-cli train examples/train_lora/llama3_lora_sft.yaml
-
---------------------------------------------------------------------
-路径： examples/inference/llama3_lora_sft.yaml
-llamafactory-cli chat examples/inference/llama3_lora_sft.yaml
---------------------------------------------------------------------
-
 # serve as API
+
 config file:
 model_name_or_path: output/Qwen3-0.6B
 template: default
@@ -49,10 +43,27 @@ llamafactory-cli api examples/inference/llama3_lora_sft.yaml
 curl -s http://localhost:8000/v1/chat/completions -H "Content-Type: application/json" -d '{"model":"output/Qwen3-0.6B","messages":[{"role":"user","content":"你是谁"}],"max_tokens":64,"temperature":0.7}'
 --------------------------------------------------------------------
 
-路径：examples/merge_lora/llama3_lora_sft.yaml
-llamafactory-cli export examples/merge_lora/llama3_lora_sft.yaml
+config file:
+model_name_or_path: Qwen/Qwen3-4B-Instruct-2507
+adapter_name_or_path: /content/LlamaFactory/saves/qwen3-4b/lora/sft/checkpoint-411
+template: qwen3_nothink
+infer_backend: huggingface  # choices: [huggingface, vllm, sglang, ktransformers]
+trust_remote_code: true
 
+llamafactory-cli api /content/qwen3_lora_sft.yaml
+
+curl -s http://localhost:8000/v1/chat/completions -H "Content-Type: application/json" -d '{"model":"Qwen/Qwen3-4B-Instruct-2507","messages":[{"role":"user","content":"你是谁"}],"max_tokens":64,"temperature":0.7}'
+
+from openai import OpenAI
+client = OpenAI(api_key="0", base_url="http://0.0.0.0:8000/v1")
+messages = [{"role": "user", "content": "who are you"}]
+result = client.chat.completions.create(
+    messages=messages,
+    model="Qwen/Qwen3-4B-Instruct-2507"
+)
+print(result.choices[0].message)
 --------------------------------------------------------------------
+
 LLaMA Factory Docs
 https://llamafactory.readthedocs.io/zh-cn/latest/
 
