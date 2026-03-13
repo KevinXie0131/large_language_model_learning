@@ -2,3 +2,4 @@ https://help.aliyun.com/zh/pai/use-cases/fine-tune-a-llama-3-model-with-llama-fa
 使用LLaMA Factory微调LlaMA 3模型
 
 model: https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct
+       Qwen/Qwen3-4B-Instruct-2507
