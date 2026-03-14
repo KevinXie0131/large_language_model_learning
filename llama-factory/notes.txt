@@ -70,10 +70,10 @@ https://llamafactory.readthedocs.io/zh-cn/latest/
 LLaMA Factory 项目代码指南
 https://blog.llamafactory.net/posts/project_guide/
 
-LLaMA-Factory QuickStart
+LLaMA-Factory QuickStart (https://huggingface.co/datasets/liumindmind/NekoQA-10K/viewer)
 https://zhuanlan.zhihu.com/p/695287607
 
-使用 LlamaFactory 微调最新一代 Qwen3.5 模型辨别人形机器人型号
+使用 LlamaFactory 微调最新一代 Qwen3.5 模型辨别人形机器人型号 (https://drive.google.com/file/d/1Bapd-3B_x8OW9mFOKiHTjG2GchKUBdUg/view)
 https://blog.llamafactory.net/posts/qwen3_5_finetuning/
 
 用户指南篇 – KTransformers 微调 × LLaMA-Factory 集成
