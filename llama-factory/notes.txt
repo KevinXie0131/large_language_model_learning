@@ -24,6 +24,8 @@ tail -f webui.log
 python scripts/vllm_infer.py --model_name_or_path /content/saves/qwen3_sft_merged --dataset alpaca_en_demo
 python scripts/vllm_infer.py --model_name_or_path /content/neko --dataset NekoQA-10K
 
+python scripts/eval_bleu_rouge.py  generated_predictions.jsonl
+
 --------------------------------------------------------------------
 (llama_factory) mylinux@DESKTOP-5JPN8FV:/mnt/c/Learning/LLaMA-Factory$ CUDA_VISIBLE_DEVICES=0 GRADIO_SHARE=1 GRADIO_SERVER_POR
 T=7860 llamafactory-cli webui
