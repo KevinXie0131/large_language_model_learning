@@ -1,7 +1,7 @@
 !pip install pyngrok
 
 # https://dashboard.ngrok.com/get-started/your-authtoken
-!ngrok config add-authtoken XXXX
+!ngrok config add-authtoken XXXXX
 
 ----------------------------------------------------------
 from pyngrok import ngrok
@@ -12,10 +12,14 @@ print(public_url)
 
 ----------------------------------------------------------
 
-git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git && cd LlamaFactory && pip install -e . && pip install -r requirements/metrics.txt && llamafactory-cli version
+git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
+cd LlamaFactory && pip install -e . && pip install -r requirements/metrics.txt && llamafactory-cli version
 nohup llamafactory-cli webui > webui.log 2>&1 &
 pip install pyngrok && ngrok config add-authtoken 1UDCO4CFmJWuSuIqdO9vrQOe3Cb_2PdtAc588Basr23Aeq8XH
 
+
+pip install --upgrade transformers
+export DISABLE_VERSION_CHECK=1
 ----------------------------------------------------------
 
 !nvidia-smi -l
