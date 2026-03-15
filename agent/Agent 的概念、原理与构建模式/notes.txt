@@ -1,7 +1,12 @@
 https://www.bilibili.com/video/BV1TSg7zuEqR
 Agent 的概念、原理与构建模式 —— 从零打造一个简化版的 Claude Code
 
+https://docs.langchain.com/oss/python/langchain/middleware/built-in#to-do-list
 
+相关的agent，直接使用gemini的api实现本地对话问答，支持读写文件，控制台指令，web搜，以及coadact
+https://github.com/LtdEdition-Peng/LLM_Auto_Agent
+
+------------------------------------------------------------
 ReAct 系统提示词
 
 职责描述
@@ -44,8 +49,8 @@ ReAct 系统提示词
 -当前目录 (Current Directory): /Users/joeygreen/PycharmProjects/VideoCode/Agent/snake
 -目录下文件列表 (Directory File List): 空 (Empty)
 
-
+------------------------------------------------------------
 <task>写一个贪吃蛇游戏，使用 HTML, css 和 js 实现，代码分别放在不同的文件中</task>
 
-
+------------------------------------------------------------
 <observation>写入成功</observation>

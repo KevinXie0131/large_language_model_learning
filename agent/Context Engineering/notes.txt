@@ -1,0 +1,11 @@
+Context Engineering：概念与技术实现深度解析
+https://www.bilibili.com/video/BV11zbPzVEUe
+
+How we built our multi-agent research system
+https://www.anthropic.com/engineering/multi-agent-research-system
+
+https://code.claude.com/docs/en/sub-agents
+
+https://blog.langchain.com/context-engineering-for-agents/
+
+https://cognition.ai/blog/dont-build-multi-agents
