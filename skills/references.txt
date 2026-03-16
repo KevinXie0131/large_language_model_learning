@@ -1,0 +1,9 @@
+参考资料：
+- 教程——
+    - Antropic 官方教程：https://claude.com/blog/complete-guide-to-building-skills-for-claude
+    - 菜鸟教程：https://www.runoob.com/ai-agent/skills-agent.html
+    - 官方中文教程：https://mp.weixin.qq.com/s/PcyKi5q8zT-tJ_9rzgKSqg
+- skills库——
+    - Antropic 官方推出的 skill 库
+    - skills.sh
+    - awesome-agent-skills: https://github.com/heilcheng/awesome-agent-skills
