@@ -1,0 +1,5 @@
+claude --dangerously-skip-permissions
+
+npx ccusage@latest
+
+npx claude-run
