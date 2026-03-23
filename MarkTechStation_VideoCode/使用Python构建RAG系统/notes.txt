@@ -1,0 +1,6 @@
+
+uv init .
+
+uv add sentence_transformers chromadb google-genai python-dotenv
+
+uv run --with jupyter jupyter lab
