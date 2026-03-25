@@ -19,7 +19,6 @@ class ReActAgent:
         self.model = model
         self.project_directory = project_directory
         self.client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
             api_key=ReActAgent.get_api_key(),
         )
 
@@ -95,9 +94,9 @@ class ReActAgent:
     def get_api_key() -> str:
         """Load the API key from an environment variable."""
         load_dotenv()
-        api_key = os.getenv("OPENROUTER_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise ValueError("未找到 OPENROUTER_API_KEY 环境变量，请在 .env 文件中设置。")
+            raise ValueError("未找到 OPENAI_API_KEY 环境变量，请在 .env 文件中设置。")
         return api_key
 
     def call_model(self, messages):
@@ -216,7 +215,8 @@ def main(project_directory):
     project_dir = os.path.abspath(project_directory)
 
     tools = [read_file, write_to_file, run_terminal_command]
-    agent = ReActAgent(tools=tools, model="openai/gpt-4o", project_directory=project_dir)
+   # agent = ReActAgent(tools=tools, model="gpt-4o", project_directory=project_dir)
+    agent = ReActAgent(tools=tools, model="o3", project_directory=project_dir)
 
     task = input("请输入任务：")
 
