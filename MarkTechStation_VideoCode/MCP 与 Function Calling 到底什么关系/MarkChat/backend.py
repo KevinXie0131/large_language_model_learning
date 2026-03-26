@@ -1,3 +1,7 @@
+# backend.py
+# 后端核心逻辑：封装了 LLM 调用、Function Calling 工具执行，以及通过 MCP 协议调用工具的能力。
+# 本文件演示了 Function Calling 的完整流程：用户提问 → 模型判断是否需要调用工具 → 执行工具 → 模型生成最终回答。
+
 import asyncio
 
 import requests
@@ -17,9 +21,12 @@ def get_api_key() -> str:
     return api_key
 
 
+# 加载 API 密钥和模型配置
 OPENROUTER_API_KEY = get_api_key()
 MODEL_NAME = "openai/gpt-4o-mini"
 
+# 定义可供模型调用的工具列表（Function Calling 的工具声明）
+# 每个工具包含名称、描述和参数的 JSON Schema 定义，模型会根据这些信息决定是否调用工具
 TOOLS = [
     {
         "type": "function",
@@ -61,6 +68,8 @@ logger = AppLogger()
 
 
 class LLMProcessor:
+    """LLM 处理器：负责与大语言模型交互，处理 Function Calling 流程。"""
+
     def __init__(self):
         self.api_key = OPENROUTER_API_KEY
         self.base_url = "https://openrouter.ai/api/v1/chat/completions"
@@ -68,10 +77,16 @@ class LLMProcessor:
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
-        
+        # 维护多轮对话的消息历史
         self.history = []
 
     def process_user_query(self, query):
+        """处理用户查询的主流程：
+        1. 将用户消息加入历史
+        2. 第一次调用模型，判断是否需要调用工具
+        3. 如果需要调用工具，执行工具并将结果返回给模型
+        4. 第二次调用模型，生成最终回答
+        """
 
         self.history.append({"role": "user", "content": query})
 
@@ -113,6 +128,7 @@ class LLMProcessor:
             }
 
     def execute_tool(self, function_name, args):
+        """直接执行工具（不通过 MCP 协议），根据工具名称分发到对应的处理函数。"""
         if function_name == "search":
             # 正常情况下，这里应该调用相关 API 做搜索，为了减少代码的复杂度，
             # 这里我们返回一段假的工具执行结果，用以测试
@@ -121,7 +137,7 @@ class LLMProcessor:
             raise ValueError(f"未知的工具名称：{function_name}")
 
     def call_model(self):
-
+        """第一次调用模型：发送用户消息和工具定义，让模型决定是否需要调用工具。"""
         request_body = {
             "model": MODEL_NAME,
             "messages": self.history,
@@ -144,6 +160,7 @@ class LLMProcessor:
         return response.json()
 
     def call_model_after_tool_execution(self):
+        """第二次调用模型：工具执行完毕后，将工具结果发送给模型，让模型生成最终回答。"""
         second_request_body = {
             "model": MODEL_NAME,
             "messages": self.history,
@@ -168,9 +185,12 @@ class LLMProcessor:
         return second_response.json()
 
     def execute_tool_with_mcp(self, function_name, args):
+        """通过 MCP 协议执行工具（同步包装器）。
+        与 execute_tool 不同，这里通过 MCP Client 连接 MCP Server 来执行工具，
+        体现了 MCP 协议将工具执行解耦到独立服务的设计思想。
+        """
         loop = asyncio.new_event_loop()
         return loop.run_until_complete(self.execute_tool_with_mcp_async(function_name, args))
-
 
     async def execute_tool_with_mcp_async(self, function_name, args):
         # 获取与当前脚本同目录下的 mcp_server.py 的绝对地址
