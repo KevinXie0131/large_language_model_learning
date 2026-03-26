@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# mcp_logger.py - MCP 通信日志记录工具
+# 作为代理（proxy）包装目标命令，透传 stdin/stdout 的同时将所有 I/O 记录到日志文件
+# 用于调试和分析 MCP 客户端与服务器之间的通信内容
 
 import sys
 import subprocess
@@ -6,19 +9,21 @@ import threading
 import argparse
 import os
 
-# --- Configuration ---
+# --- 配置 ---
+# 日志文件路径，与本脚本同目录下的 mcp_io.log
 LOG_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "mcp_io.log")
-# --- End Configuration ---
+# --- 配置结束 ---
 
-# --- Argument Parsing ---
+# --- 命令行参数解析 ---
 parser = argparse.ArgumentParser(
-    description="Wrap a command, passing STDIN/STDOUT verbatim while logging them.",
+    description="包装目标命令，透传 STDIN/STDOUT 的同时记录日志。",
     usage="%(prog)s <command> [args...]"
 )
-# Capture the command and all subsequent arguments
+# 捕获目标命令及其所有参数
 parser.add_argument('command', nargs=argparse.REMAINDER,
-                    help='The command and its arguments to execute.')
+                    help='要执行的命令及其参数')
 
+# 清空日志文件，每次运行重新记录
 open(LOG_FILE, 'w', encoding='utf-8')
 
 if len(sys.argv) == 1:
@@ -33,13 +38,13 @@ if not args.command:
     sys.exit(1)
 
 target_command = args.command
-# --- End Argument Parsing ---
+# --- 命令行参数解析结束 ---
 
-# --- I/O Forwarding Functions ---
-# These will run in separate threads
+# --- I/O 转发函数 ---
+# 以下函数在独立线程中运行，负责转发和记录数据流
 
 def forward_and_log_stdin(proxy_stdin, target_stdin, log_file):
-    """Reads from proxy's stdin, logs it, writes to target's stdin."""
+    """从代理的 stdin 读取数据，记录日志后转发到目标进程的 stdin。"""
     try:
         while True:
             # Read line by line from the script's actual stdin
@@ -83,7 +88,7 @@ def forward_and_log_stdin(proxy_stdin, target_stdin, log_file):
 
 
 def forward_and_log_stdout(target_stdout, proxy_stdout, log_file):
-    """Reads from target's stdout, logs it, writes to proxy's stdout."""
+    """从目标进程的 stdout 读取数据，记录日志后转发到代理的 stdout。"""
     try:
         while True:
             # Read line by line from the target process's stdout
@@ -116,19 +121,17 @@ def forward_and_log_stdout(target_stdout, proxy_stdout, log_file):
         except: pass
         # Don't close proxy_stdout (sys.stdout) here
 
-# --- Main Execution ---
+# --- 主执行逻辑 ---
 process = None
 log_f = None
-exit_code = 1 # Default exit code in case of early failure
+exit_code = 1  # 默认退出码，发生异常时使用
 
 try:
-    # Open log file in append mode ('a') for the threads
+    # 以追加模式打开日志文件，供各线程写入
     log_f = open(LOG_FILE, 'a', encoding='utf-8')
 
-    # Start the target process
-    # We use pipes for stdin/stdout
-    # We work with bytes (bufsize=0 for unbuffered binary, readline() still works)
-    # stderr=subprocess.PIPE could be added to capture stderr too if needed.
+    # 启动目标进程，使用管道（pipe）连接 stdin/stdout/stderr
+    # bufsize=0 表示无缓冲的二进制 I/O，确保数据及时传递
     process = subprocess.Popen(
         target_command,
         stdin=subprocess.PIPE,
@@ -137,7 +140,7 @@ try:
         bufsize=0 # Use 0 for unbuffered binary I/O
     )
 
-    # Pass binary streams to threads
+    # 创建三个线程分别转发 stdin、stdout、stderr 的二进制数据流
     stdin_thread = threading.Thread(
         target=forward_and_log_stdin,
         args=(sys.stdin.buffer, process.stdin, log_f),
@@ -150,18 +153,14 @@ try:
         daemon=True
     )
 
-    # Optional: Handle stderr similarly (log and pass through)
+    # stderr 单独处理，使用 "STDERR:" 前缀以便在日志中区分
     stderr_thread = threading.Thread(
-        target=forward_and_log_stdout, # Can reuse the function
-        args=(process.stderr, sys.stderr.buffer, log_f), # Pass stderr streams
-        # Add a different prefix in the function if needed, or modify function
-        # For now, it will log with "STDOUT:" prefix - might want to change function
-        # Let's modify the function slightly for this
+        target=forward_and_log_stdout,
+        args=(process.stderr, sys.stderr.buffer, log_f),
         daemon=True
     )
-    # A slightly modified version for stderr logging
     def forward_and_log_stderr(target_stderr, proxy_stderr, log_file):
-        """Reads from target's stderr, logs it, writes to proxy's stderr."""
+        """从目标进程的 stderr 读取数据，以 STDERR 前缀记录日志后转发。"""
         try:
             while True:
                 line_bytes = target_stderr.readline()
@@ -189,21 +188,18 @@ try:
     )
 
 
-    # Start the forwarding threads
+    # 启动所有转发线程
     stdin_thread.start()
     stdout_thread.start()
-    stderr_thread.start() # Start stderr thread too
+    stderr_thread.start()
 
-    # Wait for the target process to complete
+    # 等待目标进程执行完毕，获取退出码
     process.wait()
     exit_code = process.returncode
 
-    # Wait briefly for I/O threads to finish flushing last messages
-    # Since they are daemons, they might exit abruptly with the main thread.
-    # Joining them ensures cleaner shutdown and logging.
-    # We need to make sure the pipes are closed so the reads terminate.
-    # process.wait() ensures target process is dead, pipes should close naturally.
-    stdin_thread.join(timeout=1.0) # Add timeout in case thread hangs
+    # 等待 I/O 线程完成最后的数据刷新（设置超时防止线程挂起）
+    # process.wait() 确保目标进程已退出，管道会自然关闭
+    stdin_thread.join(timeout=1.0)
     stdout_thread.join(timeout=1.0)
     stderr_thread.join(timeout=1.0)
 
@@ -219,7 +215,7 @@ except Exception as e:
     exit_code = 1 # Indicate logger failure
 
 finally:
-    # Ensure the process is terminated if it's still running (e.g., if logger crashed)
+    # 确保目标进程已终止（防止日志记录器崩溃时进程残留）
     if process and process.poll() is None:
         try:
             process.terminate()
@@ -229,11 +225,11 @@ finally:
              try: process.kill() # Force kill
              except: pass # Ignore kill errors
 
-    # Final log message
+    # 关闭日志文件
     if log_f and not log_f.closed:
         try:
             log_f.close()
         except: pass # Ignore errors during final logging attempt
 
-    # Exit with the target process's exit code
+    # 使用目标进程的退出码退出，保持与原始命令一致的行为
     sys.exit(exit_code)
