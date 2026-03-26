@@ -106,6 +106,7 @@ class ReActAgent:
             messages=messages,
         )
         content = response.choices[0].message.content
+        # 将助手回复追加到消息列表中，以保持多轮对话上下文
         messages.append({"role": "assistant", "content": content})
         return content
 
@@ -147,6 +148,7 @@ class ReActAgent:
                     current_arg += char
             else:
                 current_arg += char
+                # 遇到非转义的匹配引号时，结束字符串状态
                 if char == string_char and (i == 0 or args_str[i-1] != '\\'):
                     in_string = False
                     string_char = None
@@ -199,6 +201,7 @@ def read_file(file_path):
 def write_to_file(file_path, content):
     """将指定内容写入指定文件"""
     with open(file_path, "w", encoding="utf-8") as f:
+        # 将 LLM 输出中的字面 \n 转换为实际换行符
         f.write(content.replace("\\n", "\n"))
     return "写入成功"
 
