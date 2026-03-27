@@ -2,6 +2,9 @@
 https://mirage-thought-d06.notion.site/Python-24f747825dae80fdb270c15b76b61b26
 ---------------------------------
 nv python install cpython-3.13
+nv python install 3.13
+nv python uninstall 3.13
+nv python pin 3.13
 
 uv python list
 
@@ -14,6 +17,7 @@ uv init -p 3.13
 pyproject.toml
 
 uv add pydantic
+uv add matplotlib==3.10.0
 
 uv run main.py
 
@@ -24,5 +28,16 @@ nv remove ruff --dev
 
 uv tool install ruff
 uv tool list
+---------------------------------
+uv venv
+
+uv cache dir
+缓存文件卸载命令
+uv cache clean
+---------------------------------
+uv sync
+
+从requirements.txt复刻环境
+uv add -r requirements.txt
 ---------------------------------
 uv build
