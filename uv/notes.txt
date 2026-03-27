@@ -1,2 +1,28 @@
 
 https://mirage-thought-d06.notion.site/Python-24f747825dae80fdb270c15b76b61b26
+---------------------------------
+nv python install cpython-3.13
+
+uv python list
+
+uv run -p 3.13 main.py
+uv run -p 3.13 python
+---------------------------------
+uv init
+uv init -p 3.13
+
+pyproject.toml
+
+uv add pydantic
+
+uv run main.py
+
+uv tree
+
+nv add ruff --dev
+nv remove ruff --dev
+
+uv tool install ruff
+uv tool list
+---------------------------------
+uv build
