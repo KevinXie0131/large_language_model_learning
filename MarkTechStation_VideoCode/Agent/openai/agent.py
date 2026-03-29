@@ -27,7 +27,6 @@ class ReActAgent:
         self.project_directory = project_directory
         self.client = OpenAI(
             api_key=ReActAgent.get_api_key(),
-            base_url="https://openrouter.ai/api/v1",
         )
 
     def run(self, user_input: str):
@@ -125,10 +124,10 @@ class ReActAgent:
         Load the API key from an environment variable
         """
         load_dotenv()
-        api_key = os.getenv("OPENROUTER_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise ValueError("未找到 OPENROUTER_API_KEY 环境变量，请在 .env 文件中设置。"
-                             " / OPENROUTER_API_KEY not found. Please set it in the .env file.")
+            raise ValueError("未找到 OPENAI_API_KEY 环境变量，请在 .env 文件中设置。"
+                             " / OPENAI_API_KEY not found. Please set it in the .env file.")
         return api_key
 
     def call_model(self, messages):
