@@ -29,7 +29,11 @@ nv remove ruff --dev
 uv tool install ruff
 uv tool list
 ---------------------------------
-uv venv
+uv venv  # 创建虚拟环境, 默认会在当前目录下创建一个 .venv 文件夹
+uv venv --python 3.11
+
+激活环境 Windows:
+.venv\Scripts\activate
 
 uv cache dir
 缓存文件卸载命令

@@ -2,3 +2,10 @@
 
 - weather.py：一个示例 MCP Server，可用于天气预告和天气预警，代码主要来自 MCP 官方示例。
 - mcp_logger.py：用于记录 MCP Server 的输入输出，并把记录内容放到 mcp_io.log 上面，该代码主要由 Gemini 2.5 Pro 编写。
+
+
+how to run in local:
+uv --directory C:\Backup\Tech\large_language_model_learning\MarkTechStation_VideoCode\MCP终极指南-进阶篇\weather run weather.py
+
+python mcp_logger.py uv --directory C:\Backup\Tech\large_language_model_learning\MarkTechStation_VideoCode\MCP终极指南-进阶篇\weather run weather.py
+
