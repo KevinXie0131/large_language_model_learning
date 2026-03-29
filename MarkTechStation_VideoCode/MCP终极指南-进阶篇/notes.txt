@@ -1,0 +1,62 @@
+
+https://mcpservers.org/servers/modelcontextprotocol/fetch
+
+https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+{
+  "mcpServers": {
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"]
+    }
+  }
+}
+
+---------------------------------------------------------------------------
+https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/username/Desktop",
+        "/path/to/other/allowed/dir"
+      ]
+    }
+  }
+}
+
+---------------------------------------------------------------------------
+https://mcpservers.org/servers/wopal-cn/mcp-hotnews-server
+{
+  "mcpServers": {
+    "mcp-server-hotnews": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@wopal/mcp-server-hotnews"
+      ]
+    }
+  }
+}
+
+---------------------------------------------------------------
+{
+  "mcpServers": {
+    "weather": {
+      "timeout": 60,
+      "command": "python",
+      "args": [
+        "C:\\Backup\\weather\\mcp_logger.py
+        "uv",
+        "--directory",
+        "C:\\Backup\\weather",
+        "run",
+        "weather.py"
+      ],
+      "transportType": "stdio"
+    }
+  }
+}
