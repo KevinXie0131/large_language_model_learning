@@ -286,7 +286,7 @@ def main(project_directory):
 
     # 注册可用工具 / Register available tools
     tools = [read_file, write_to_file, run_terminal_command]
-    agent = ReActAgent(tools=tools, model="minimax/minimax-m2.5", project_directory=project_dir)
+    agent = ReActAgent(tools=tools, model="gpt-4o", project_directory=project_dir)
    # agent = ReActAgent(tools=tools, model="o3", project_directory=project_dir)
 
     # 获取用户任务输入 / Get user task input
