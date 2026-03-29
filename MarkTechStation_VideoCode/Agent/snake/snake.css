@@ -1,0 +1,90 @@
+/* 全局样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-container {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+h1 {
+    color: #00ff88;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.score-board {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+#score {
+    color: #ffcc00;
+    font-weight: bold;
+}
+
+canvas {
+    border: 3px solid #00ff88;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    background: #0a0a0a;
+}
+
+.controls {
+    margin-top: 20px;
+}
+
+button {
+    padding: 12px 30px;
+    font-size: 1rem;
+    margin: 0 10px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#startBtn {
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    color: #000;
+    font-weight: bold;
+}
+
+#restartBtn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+    color: #fff;
+    font-weight: bold;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+.tips {
+    color: #aaa;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
