@@ -14,7 +14,7 @@ class AppLogger:
         初始化日志记录器，启动时清空日志文件。"""
         self.log_file = log_file
         # Clear the log file on startup / 启动时清空日志文件
-        with open(self.log_file, 'w') as f:
+        with open(self.log_file, 'w', encoding='utf-8') as f:
             f.write("")
 
     def log(self, message):
@@ -22,7 +22,7 @@ class AppLogger:
         将消息同时记录到文件和控制台。"""
 
         # Log to file / 记录到文件
-        with open(self.log_file, 'a') as f:
+        with open(self.log_file, 'a', encoding='utf-8') as f:
             f.write(message + "\n")
 
         # Log to console / 输出到控制台
@@ -38,7 +38,7 @@ logger = AppLogger("llm.log")
 # Proxy endpoint: receives chat completion requests, logs them,
 # forwards to OpenRouter API, and streams the response back while logging each line
 # 代理端点：接收聊天补全请求并记录，转发到 OpenRouter API，并在记录每一行的同时流式返回响应
-@app.post("/chat/completions")
+@app.post("/v1/chat/completions")
 async def proxy_request(request: Request):
 
     # Read and log the incoming request body / 读取并记录传入的请求体
