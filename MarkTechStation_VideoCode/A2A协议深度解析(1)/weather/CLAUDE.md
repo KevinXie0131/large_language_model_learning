@@ -14,3 +14,10 @@ uv sync
 # `.` 表示运行当前目录下的 __main__.py 入口文件
 uv run .
 ```
+
+git clone https://github.com/a2aproject/a2a-samples
+cd demo/ui
+create .env and input GOOGLE_API_KEY=XXXXXXXXXXXXXXX
+uv run main.py
+
+and create API KEY from google ai studio
