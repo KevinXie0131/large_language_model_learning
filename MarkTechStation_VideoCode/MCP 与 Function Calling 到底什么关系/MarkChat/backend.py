@@ -185,6 +185,10 @@ class LLMProcessor:
         # Parse the second response
         return second_response.json()
 
+    # 这段代码实现了通过 MCP 协议调用工具的机制，其功能如下：
+    #   execute_tool_with_mcp：同步方法，创建新的事件循环并运行异步方法 execute_tool_with_mcp_async，实现阻塞式调用。
+    #   execute_tool_with_mcp_async：异步方法，定位 mcp_server.py 路径，启动 MCP 客户端并连接服务器，调用指定工具。
+    #   体现了 MCP 协议将工具执行解耦到独立服务的设计思想。
     def execute_tool_with_mcp(self, function_name, args):
         """通过 MCP 协议执行工具（同步包装器）。
         与 execute_tool 不同，这里通过 MCP Client 连接 MCP Server 来执行工具，
