@@ -11,6 +11,10 @@
 2. 启动服务器
 
    ```bash
+   uv sync
+   
+   .venv\Scripts\activate
+   
    uv run start.py
    ```
 

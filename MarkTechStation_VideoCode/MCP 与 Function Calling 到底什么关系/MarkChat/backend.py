@@ -53,14 +53,14 @@ class AppLogger:
         """Initialize the logger with a file that will be cleared on startup."""
         self.log_file = "model.log"
         # Clear the log file on startup
-        with open(self.log_file, 'w') as f:
+        with open(self.log_file, 'w', encoding='utf-8') as f:
             f.write("")
 
     def log(self, message):
         """Log a message to both file and console."""
 
         # Log to file
-        with open(self.log_file, 'a') as f:
+        with open(self.log_file, 'a', encoding='utf-8') as f:
             f.write(message + "\n")
 
 
