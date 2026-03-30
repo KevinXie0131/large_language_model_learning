@@ -1,0 +1,193 @@
+第一次模型请求：
+{
+  "model": "openai/gpt-4o-mini",
+  "messages": [
+    {
+      "role": "user",
+      "content": "what is weather of new york tomorrow"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "search",
+        "description": "搜索网络",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "要搜索的内容"
+            }
+          },
+          "required": [
+            "query"
+          ]
+        }
+      }
+    }
+  ],
+  "stream": false
+}
+
+第一次模型返回：
+{
+  "id": "gen-1774831509-oJG7K1UlgwkRn52xVYOY",
+  "object": "chat.completion",
+  "created": 1774831509,
+  "model": "openai/gpt-4o-mini",
+  "provider": "OpenAI",
+  "system_fingerprint": "fp_e738e3044b",
+  "choices": [
+    {
+      "index": 0,
+      "logprobs": null,
+      "finish_reason": "tool_calls",
+      "native_finish_reason": "tool_calls",
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "refusal": null,
+        "reasoning": null,
+        "tool_calls": [
+          {
+            "type": "function",
+            "index": 0,
+            "id": "call_3MezqzJ7P90rt7HYG6cebjMF",
+            "function": {
+              "name": "search",
+              "arguments": "{\"query\":\"New York weather forecast for tomorrow\"}"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 53,
+    "completion_tokens": 18,
+    "total_tokens": 71,
+    "cost": 1.875e-05,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 1.875e-05,
+      "upstream_inference_prompt_cost": 7.95e-06,
+      "upstream_inference_completions_cost": 1.08e-05
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  }
+}
+
+第二次模型请求：
+{
+  "model": "openai/gpt-4o-mini",
+  "messages": [
+    {
+      "role": "user",
+      "content": "what is weather of new york tomorrow"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "call_3MezqzJ7P90rt7HYG6cebjMF",
+          "function": {
+            "name": "search",
+            "arguments": "{\"query\":\"New York weather forecast for tomorrow\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_3MezqzJ7P90rt7HYG6cebjMF",
+      "name": "search",
+      "content": "来自 MCP Server 的答案：纽约市今天的天气是晴天，明天的天气是多云。"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "search",
+        "description": "搜索网络",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "要搜索的内容"
+            }
+          },
+          "required": [
+            "query"
+          ]
+        }
+      }
+    }
+  ]
+}
+
+第二次模型返回：
+{
+  "id": "gen-1774831513-9dGhtzuI2HpjrU7cj2E5",
+  "object": "chat.completion",
+  "created": 1774831513,
+  "model": "openai/gpt-4o-mini",
+  "provider": "OpenAI",
+  "system_fingerprint": "fp_ebf4e532f9",
+  "choices": [
+    {
+      "index": 0,
+      "logprobs": null,
+      "finish_reason": "stop",
+      "native_finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "Tomorrow's weather in New York is expected to be cloudy.",
+        "refusal": null,
+        "reasoning": null
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 101,
+    "completion_tokens": 13,
+    "total_tokens": 114,
+    "cost": 2.295e-05,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 2.295e-05,
+      "upstream_inference_prompt_cost": 1.515e-05,
+      "upstream_inference_completions_cost": 7.8e-06
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  }
+}
+

@@ -9,6 +9,14 @@ import threading
 import argparse
 import os
 
+# 这段代码实现了一个 MCP 通信日志记录工具，其功能如下：
+#   解析用户输入的命令，启动目标子进程。
+#   清空或创建日志文件，准备记录 I/O 数据。
+#   创建线程分别监听和转发标准输入、标准输出和标准错误输出。
+#   在转发数据的同时，将内容记录到日志文件中，便于调试和分析。
+#   处理子进程的生命周期，确保其正常终止。
+#   关闭日志文件，并以目标进程的退出码退出程序。
+
 # --- 配置 ---
 # 日志文件路径，与本脚本同目录下的 mcp_io.log
 LOG_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "mcp_io.log")

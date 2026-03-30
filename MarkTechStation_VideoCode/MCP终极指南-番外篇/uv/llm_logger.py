@@ -7,6 +7,13 @@ import httpx
 from fastapi import FastAPI, Request
 from starlette.responses import StreamingResponse
 
+# 这段代码实现了一个 LLM API 请求记录代理服务，其功能如下：
+#   创建日志记录器 AppLogger，用于将日志同时输出到文件和控制台，并在启动时清空旧日志。
+#   使用 FastAPI 创建一个代理服务，监听 /v1/chat/completions 接口。
+#   接收客户端的请求后，记录请求内容到日志。
+#   将请求转发到 OpenRouter API，并以流式方式接收响应。
+#   在转发响应时逐行记录响应内容到日志，并将响应流式返回给客户端。
+#   服务默认运行在 8000 端口。
 
 class AppLogger:
     def __init__(self, log_file="llm.log"):
