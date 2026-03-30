@@ -50,7 +50,7 @@ class ReActAgent:
             # 检测思考过程（<thought> 标签）/ Detect thinking process (<thought> tag)
             thought_match = re.search(r"<thought>(.*?)</thought>", content, re.DOTALL)
             if thought_match:
-                thought = thought_match.group(1)
+                thought = thought_match.group(1) # thought_match.group(1) 的作用是从正则表达式匹配结果中提取第一个捕获组的内容。
                 print(f"\n\n💭 Thought: {thought}")
 
             # 检测模型是否输出最终答案，如果是则直接返回
@@ -147,6 +147,7 @@ class ReActAgent:
         messages.append({"role": "assistant", "content": content})
         return content
 
+    # 这段代码的功能是解析一个表示函数调用的字符串，提取出函数名和参数列表。
     def parse_action(self, code_str: str) -> Tuple[str, List[str]]:
         """
         解析 action 字符串，提取函数名和参数列表
@@ -208,6 +209,7 @@ class ReActAgent:
 
         return func_name, args
 
+    # 这段代码的功能是解析单个函数参数的字符串表示
     def _parse_single_arg(self, arg_str: str):
         """
         解析单个参数值
