@@ -101,7 +101,8 @@ class LLMProcessor:
             tool_name = tool_call["function"]["name"]
             tool_args = json.loads(tool_call["function"]["arguments"])
 
-            result = self.execute_tool(tool_name, tool_args)
+        #   result = self.execute_tool(tool_name, tool_args)
+            result = self.execute_tool_with_mcp(tool_name, tool_args)
 
             self.history.append({
                 "role": "tool",
