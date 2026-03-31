@@ -14,6 +14,28 @@ Graph structure (same as chatbot.py):
   START → chatbot → (has tool calls?) → tools → chatbot → ... → END
 """
 
+# 这里 stream_mode 有三种选项：
+#   updates：按节点执行步骤流式返回 graph state 的更新（包括 tool / LLM / 其他节点）
+#   messages：流式输出 LLM 的 message（token 级别或 chunk 级别）
+#   values：返回每一步执行后的完整 state（非流式 token，而是完整结果快照）
+#   custom：允许在节点/工具内部通过 get_stream_writer() 主动写入自定义流式输出
+# 关于流式输出的这几种选项，在后面结合 Graph，会体现出更大的作用。
+
+# LangGraph 的 stream_mode 常见有四种：
+# updates：
+#   按节点执行顺序流式返回 graph state 的增量更新（每个 node 执行完触发一次）。
+# messages：
+#   用于 LLM token 流式输出，返回 message chunk（token 级别）。
+# values：
+#   返回每一步执行后的完整 state（非增量、非 token 流）。
+# custom：
+#   允许在节点或工具内部通过 get_stream_writer() 主动写入自定义流式输出。
+
+# updates → 看流程（每一步干了啥）
+# messages → 看模型说话（token）
+# values → 看结果（完整状态）
+# custom → 自己往流里塞内容
+
 import os
 from datetime import datetime
 
