@@ -29,22 +29,22 @@ load_dotenv()
 #    Beyond just messages, we track the draft, critique, and iteration count.
 # ---------------------------------------------------------------------------
 
-MAX_ITERATIONS = 3
+MAX_ITERATIONS = 3  # Maximum reflection iterations / 最大反思迭代次数
 
 
 class ReflectionState(TypedDict):
-    topic: str  # the user's original request
-    draft: str  # current draft from the writer
-    critique: str  # feedback from the critic
-    iteration: int  # current iteration count
-    history: list[str]  # track each draft for comparison
+    topic: str  # the user's original request / 用户的原始请求主题
+    draft: str  # current draft from the writer / 写作者的当前草稿
+    critique: str  # feedback from the critic / 评论者的反馈
+    iteration: int  # current iteration count / 当前迭代次数
+    history: list[str]  # track each draft for comparison / 记录每次草稿，用于对比
 
 
 # ---------------------------------------------------------------------------
 # 2. LLM setup
 # ---------------------------------------------------------------------------
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)  # temperature 0.7: moderate creativity, good for writing / 温度0.7：适度创造性，适合写作任务
 
 # ---------------------------------------------------------------------------
 # 3. Graph Nodes
@@ -71,8 +71,7 @@ def writer_node(state: ReflectionState):
     """Generate or revise the draft based on the topic and any critique."""
     messages = [SystemMessage(content=WRITER_SYSTEM)]
 
-    if state.get("critique"):
-        # Revision pass - include previous draft and critique
+    if state.get("critique"):  # Has critique feedback → enter revision mode / 有评论反馈 → 进入修订模式
         messages.append(
             HumanMessage(
                 content=(
@@ -83,8 +82,7 @@ def writer_node(state: ReflectionState):
                 )
             )
         )
-    else:
-        # First pass - just the topic
+    else:  # First pass → just the topic / 首次撰写 → 只提供主题
         messages.append(
             HumanMessage(content=f"Write about: {state['topic']}")
         )
@@ -128,16 +126,16 @@ def should_revise(state: ReflectionState) -> str:
     critique = state.get("critique", "")
     iteration = state.get("iteration", 0)
 
-    # Stop if we've hit the max iterations
+    # Stop if we've hit the max iterations / 达到最大迭代次数，强制停止
     if iteration >= MAX_ITERATIONS:
         return "done"
 
-    # Stop if the critic rated it EXCELLENT or GOOD
-    first_line = critique.strip().split("\n")[0].upper()
+    # Stop if the critic rated it EXCELLENT or GOOD / 质量达标，提前停止
+    first_line = critique.strip().split("\n")[0].upper()  # Parse the rating from first line / 解析评论第一行的评级
     if "EXCELLENT" in first_line or "GOOD" in first_line:
         return "done"
 
-    return "revise"
+    return "revise"  # Needs more revision / 需要继续修订
 
 
 # ---------------------------------------------------------------------------
@@ -149,12 +147,12 @@ graph = StateGraph(ReflectionState)
 graph.add_node("writer", writer_node)
 graph.add_node("critic", critic_node)
 
-graph.add_edge(START, "writer")
-graph.add_edge("writer", "critic")
-graph.add_conditional_edges(
+graph.add_edge(START, "writer")  # Entry: start by writing a draft / 入口：先写草稿
+graph.add_edge("writer", "critic")  # After writing, pass to critic / 写完后交给评论者
+graph.add_conditional_edges(  # After critique, decide whether to revise / 评论后决定是否继续修订
     "critic",
     should_revise,
-    {"revise": "writer", "done": END},
+    {"revise": "writer", "done": END},  # revise → back to writer; done → end / revise → 回到写作者; done → 结束
 )
 
 app = graph.compile()

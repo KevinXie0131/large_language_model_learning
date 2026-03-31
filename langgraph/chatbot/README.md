@@ -16,6 +16,16 @@ A demo project showing how to build tool-calling chatbots and agents using [Lang
 | `plan_and_execute.py` | **Plan-and-Execute** - creates a step-by-step plan, executes each step, re-plans if needed |
 | `rag_agent.py` | **RAG Agent** - retrieves documents from a vector store before answering questions |
 
+chatbot.py                │ 工具装饰器、LLM初始化、工具绑定、状态图构建、条件路由、消息历史管理   
+react_agent.py            │ 预构建代理说明、一行创建等价关系、对话历史更新   
+human_in_the_loop.py      │ interrupt/Command机制、工具风险分类、审批流程、检查点必要性、中断恢复循环
+multi_agent_supervisor.py │ 结构化输出、路由决定、工作节点专属提示、自定义状态(add_messages注解)、主管-工人循环
+persistence_memory.py     │ MemorySaver检查点、线程管理、状态持久化、get_state读取   
+streaming.py              │ AIMessageChunk类型、updates模式(节点级)、messages模式(token级)、flush实时显示      
+reflection.py             │ 自定义状态字段、迭代控制、评级解析、写作-评论循环边  
+plan_and_execute.py       │ 计划状态字段、步骤解析、执行上下文构建、重新规划判断、三节点流程
+rag_agent.py              │ 向量存储/嵌入模型、相似度检索、系统提示注入、检索+生成流程    
+
 ## Setup
 
 1. Install dependencies:

@@ -18,7 +18,7 @@ import os
 from datetime import datetime
 
 from dotenv import load_dotenv
-from langchain_core.messages import AIMessageChunk
+from langchain_core.messages import AIMessageChunk  # Streaming message chunk type / 流式输出的消息片段类型
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, MessagesState, StateGraph
@@ -114,10 +114,10 @@ def stream_updates(user_input: str, messages: list):
     messages.append({"role": "user", "content": user_input})
 
     final_messages = messages
-    for chunk in app.stream(
+    for chunk in app.stream(  # updates mode: yields state updates as each node completes / updates 模式：每个节点完成时产出状态更新
         {"messages": messages}, stream_mode="updates"
     ):
-        for node_name, update in chunk.items():
+        for node_name, update in chunk.items():  # chunk is {node_name: state_update} dict / chunk 是 {节点名: 状态更新} 字典
             print(f"\n[Node: {node_name}]")
             node_messages = update.get("messages", [])
             for msg in node_messages:
@@ -151,15 +151,16 @@ def stream_tokens(user_input: str, messages: list):
     print("\nAssistant: ", end="", flush=True)
     final_content = ""
 
-    for chunk, metadata in app.stream(
+    for chunk, metadata in app.stream(  # messages mode: yields individual tokens, ideal for real-time typing effect / messages 模式：逐 token 产出，适合实时打字效果
         {"messages": messages}, stream_mode="messages"
     ):
         # Only print AI message tokens (not tool calls or tool results)
+        # 只打印 AI 文本 token（跳过工具调用）
         if isinstance(chunk, AIMessageChunk) and chunk.content:
-            print(chunk.content, end="", flush=True)
+            print(chunk.content, end="", flush=True)  # flush=True ensures immediate display / flush=True 确保立即显示
             final_content += chunk.content
 
-    print()  # newline after streaming completes
+    print()  # newline after streaming completes / 流式完成后换行
     return final_content
 
 

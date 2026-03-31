@@ -23,8 +23,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 from langchain_core.tools import tool
-from langchain_core.vectorstores import InMemoryVectorStore
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_core.vectorstores import InMemoryVectorStore  # In-memory vector store (for demo) / 内存向量存储（演示用）
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings  # OpenAI embedding model / OpenAI 嵌入模型
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
 
@@ -114,11 +114,11 @@ SAMPLE_DOCUMENTS = [
 # ---------------------------------------------------------------------------
 
 print("Building vector store from sample documents...")
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-vector_store = InMemoryVectorStore.from_documents(
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")  # Text embedding model: converts text to vectors / 文本嵌入模型：将文本转为向量
+vector_store = InMemoryVectorStore.from_documents(  # Create vector store from document list / 从文档列表创建向量存储
     SAMPLE_DOCUMENTS, embedding=embeddings
 )
-retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+retriever = vector_store.as_retriever(search_kwargs={"k": 3})  # Retriever: return top 3 most similar docs / 检索器：返回最相似的3个文档
 print(f"Indexed {len(SAMPLE_DOCUMENTS)} documents.\n")
 
 # ---------------------------------------------------------------------------
@@ -131,17 +131,17 @@ def search_knowledge_base(query: str) -> str:
     """Search the knowledge base for relevant information about LangGraph.
     Use this tool when the user asks about LangGraph concepts, features,
     or implementation details."""
-    docs = retriever.invoke(query)
+    docs = retriever.invoke(query)  # Execute vector similarity search / 执行向量相似度搜索
     if not docs:
         return "No relevant documents found."
 
     results = []
     for i, doc in enumerate(docs, 1):
-        source = doc.metadata.get("source", "unknown")
-        topic = doc.metadata.get("topic", "general")
+        source = doc.metadata.get("source", "unknown")  # Document source / 文档来源
+        topic = doc.metadata.get("topic", "general")  # Document topic / 文档主题
         results.append(f"[{i}] ({source}/{topic}): {doc.page_content}")
 
-    return "\n\n".join(results)
+    return "\n\n".join(results)  # Join retrieval results and return to LLM / 拼接检索结果返回给 LLM
 
 
 @tool
@@ -170,13 +170,12 @@ llm_with_tools = llm.bind_tools(tools)
 
 def chatbot_node(state: MessagesState):
     messages = state["messages"]
-    # Prepend system prompt if not already there
     from langchain_core.messages import SystemMessage
 
-    if not messages or not isinstance(messages[0], SystemMessage):
+    if not messages or not isinstance(messages[0], SystemMessage):  # Ensure system prompt is at the start / 确保系统提示在消息列表开头
         messages = [SystemMessage(content=SYSTEM_PROMPT)] + messages
 
-    response = llm_with_tools.invoke(messages)
+    response = llm_with_tools.invoke(messages)  # LLM decides: answer directly or search KB first / LLM 决定是直接回答还是先检索知识库
     return {"messages": [response]}
 
 
@@ -226,10 +225,10 @@ def main():
 
         messages.append({"role": "user", "content": user_input})
 
-        # Stream to show retrieval in action
+        # Stream to show retrieval in action / 流式输出，展示检索过程
         print()
         final_content = ""
-        for chunk in app.stream(
+        for chunk in app.stream(  # Stream graph execution, show retrieval and generation in real-time / 流式执行图，实时显示检索和生成过程
             {"messages": messages}, stream_mode="updates"
         ):
             for node_name, update in chunk.items():

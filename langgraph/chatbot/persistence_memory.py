@@ -21,7 +21,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.memory import MemorySaver  # In-memory checkpointer: persist conversation state / 内存检查点：持久化对话状态
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
 
@@ -42,7 +42,7 @@ def get_current_time() -> str:
 def remember_fact(fact: str) -> str:
     """Store a fact that the user wants to remember. The fact is stored
     in the conversation history and will be available in future turns."""
-    return f"Noted! I'll remember: {fact}"
+    return f"Noted! I'll remember: {fact}"  # Fact stored in conversation history, persisted via checkpointer / 事实存储在对话历史中，通过检查点持久化
 
 
 tools = [get_current_time, remember_fact]
@@ -87,8 +87,10 @@ graph.add_edge("tools", "chatbot")
 #      checkpointer = SqliteSaver.from_conn_string("chat.db")
 # ---------------------------------------------------------------------------
 
+# MemorySaver stores in RAM (lost when process exits). For real persistence, use SqliteSaver or PostgresSaver
+# 内存检查点（进程退出后丢失；生产环境用 SqliteSaver 或 PostgresSaver）
 checkpointer = MemorySaver()
-app = graph.compile(checkpointer=checkpointer)
+app = graph.compile(checkpointer=checkpointer)  # Compile graph with checkpoint persistence / 编译图并启用检查点持久化
 
 # ---------------------------------------------------------------------------
 # 4. Interactive CLI with Thread Management
@@ -106,7 +108,7 @@ Commands:
 
 def show_thread_history(config):
     """Display the message history for the current thread."""
-    state = app.get_state(config)
+    state = app.get_state(config)  # Read full state of specified thread from checkpointer / 从检查点读取指定线程的完整状态
     if not state.values:
         print("  (no messages yet)")
         return
@@ -131,8 +133,8 @@ def main():
     print("  Type /help for commands, 'quit' to exit")
     print("=" * 60)
 
-    current_thread = "default"
-    threads = {"default"}
+    current_thread = "default"  # Default thread name / 默认线程名
+    threads = {"default"}  # Track all created threads / 跟踪所有已创建的线程
 
     print(f"\n[Active thread: {current_thread}]")
 
@@ -174,12 +176,12 @@ def main():
             show_thread_history(config)
             continue
 
-        # Normal message - send to the graph
-        config = {"configurable": {"thread_id": current_thread}}
+        # Normal message - send to the graph / 普通消息 - 发送到图
+        config = {"configurable": {"thread_id": current_thread}}  # Each thread has independent conversation state / 每个线程有独立的对话状态
 
         result = app.invoke(
             {"messages": [{"role": "user", "content": user_input}]},
-            config=config,
+            config=config,  # Checkpointer auto saves/restores full history for this thread / 检查点自动保存/恢复该线程的完整历史
         )
 
         ai_message = result["messages"][-1]

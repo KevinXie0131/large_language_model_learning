@@ -34,11 +34,11 @@ load_dotenv()
 
 
 class PlanExecuteState(TypedDict):
-    task: str  # the original user request
-    plan: list[str]  # list of steps to execute
-    current_step: int  # index of the current step
-    results: list[str]  # results from each executed step
-    final_answer: str  # the synthesized final answer
+    task: str  # the original user request / 用户的原始任务请求
+    plan: list[str]  # list of steps to execute / 待执行的步骤列表
+    current_step: int  # index of the current step / 当前执行到第几步（索引）
+    results: list[str]  # results from each executed step / 每步执行的结果
+    final_answer: str  # the synthesized final answer / 综合后的最终答案
 
 
 # ---------------------------------------------------------------------------
@@ -72,16 +72,15 @@ def planner_node(state: PlanExecuteState):
     ]
     response = llm.invoke(messages)
 
-    # Parse the numbered list into steps
+    # Parse the numbered list into steps / 解析编号列表为步骤
     steps = []
     for line in response.content.strip().split("\n"):
         line = line.strip()
         if line and line[0].isdigit():
-            # Remove the number prefix (e.g., "1. " or "1) ")
-            step = line.split(".", 1)[-1].strip() if "." in line[:3] else line
+            step = line.split(".", 1)[-1].strip() if "." in line[:3] else line  # Remove the number prefix / 去除编号前缀
             steps.append(step)
 
-    return {"plan": steps, "current_step": 0, "results": []}
+    return {"plan": steps, "current_step": 0, "results": []}  # Initialize plan state / 初始化计划状态
 
 
 EXECUTOR_SYSTEM = """You are an execution agent. You are given a specific step
@@ -94,10 +93,10 @@ If you need information from previous steps, it will be provided as context."""
 def executor_node(state: PlanExecuteState):
     """Execute the current step of the plan."""
     step_idx = state["current_step"]
-    current_step = state["plan"][step_idx]
+    current_step = state["plan"][step_idx]  # Get the current step to execute / 获取当前待执行的步骤
     previous_results = state.get("results", [])
 
-    # Build context from previous steps
+    # Build context from previous steps / 构建前序步骤的执行结果作为上下文
     context = ""
     if previous_results:
         context = "\n\nResults from previous steps:\n"
@@ -116,8 +115,8 @@ def executor_node(state: PlanExecuteState):
     ]
     response = llm.invoke(messages)
 
-    new_results = list(previous_results) + [response.content]
-    return {"results": new_results, "current_step": step_idx + 1}
+    new_results = list(previous_results) + [response.content]  # Append current step result / 追加当前步骤结果
+    return {"results": new_results, "current_step": step_idx + 1}  # Advance step index / 步骤索引前进
 
 
 REPLANNER_SYSTEM = """You are a re-planning agent. Given the original task,
@@ -145,14 +144,14 @@ def replanner_node(state: PlanExecuteState):
     ]
     response = llm.invoke(messages)
 
-    if "COMPLETE" in response.content.upper():
-        # Synthesize final answer from all results
+    if "COMPLETE" in response.content.upper():  # Replanner determined task is complete / 重新规划者判断任务已完成
+        # Synthesize final answer from all results / 综合所有步骤结果为最终答案
         final = "\n\n".join(
             f"**Step {i+1}:** {r}" for i, r in enumerate(state["results"])
         )
         return {"final_answer": final}
 
-    # Parse revised plan
+    # Parse revised plan / 解析修订后的计划
     steps = []
     for line in response.content.strip().split("\n"):
         line = line.strip()
@@ -177,16 +176,16 @@ def replanner_node(state: PlanExecuteState):
 
 def should_continue_executing(state: PlanExecuteState) -> str:
     """After executing a step, check if there are more steps."""
-    if state["current_step"] >= len(state["plan"]):
-        return "replanner"
-    return "executor"
+    if state["current_step"] >= len(state["plan"]):  # All steps executed / 所有步骤执行完毕
+        return "replanner"  # Hand off to replanner for evaluation / 交给重新规划者评估
+    return "executor"  # Continue executing next step / 继续执行下一步
 
 
 def after_replan(state: PlanExecuteState) -> str:
     """After re-planning, check if we're done or need to keep going."""
-    if state.get("final_answer"):
+    if state.get("final_answer"):  # Has final answer → task complete / 有最终答案 → 任务完成
         return END
-    return "executor"
+    return "executor"  # New plan needs continued execution / 新计划需要继续执行
 
 
 # ---------------------------------------------------------------------------
@@ -195,14 +194,14 @@ def after_replan(state: PlanExecuteState) -> str:
 
 graph = StateGraph(PlanExecuteState)
 
-graph.add_node("planner", planner_node)
-graph.add_node("executor", executor_node)
-graph.add_node("replanner", replanner_node)
+graph.add_node("planner", planner_node)  # Planner: creates step-by-step plan / 规划者：制定步骤计划
+graph.add_node("executor", executor_node)  # Executor: runs steps one by one / 执行者：逐步执行计划
+graph.add_node("replanner", replanner_node)  # Replanner: evaluates if plan needs adjustment / 重新规划者：评估是否需要调整计划
 
-graph.add_edge(START, "planner")
-graph.add_edge("planner", "executor")
-graph.add_conditional_edges("executor", should_continue_executing)
-graph.add_conditional_edges("replanner", after_replan)
+graph.add_edge(START, "planner")  # Entry: create the plan first / 入口：先制定计划
+graph.add_edge("planner", "executor")  # After planning, start executing / 计划制定后开始执行
+graph.add_conditional_edges("executor", should_continue_executing)  # After execution: continue or hand to replanner / 执行后判断：继续执行或交给重新规划者
+graph.add_conditional_edges("replanner", after_replan)  # After replan: done or continue executing / 重新规划后判断：完成或继续执行
 
 app = graph.compile()
 

@@ -16,11 +16,11 @@ from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import create_react_agent
+from langgraph.prebuilt import create_react_agent  # Prebuilt ReAct agent / 预构建的 ReAct 代理
 
 load_dotenv()
 
-# --- Tools (same as chatbot.py) ---
+# --- Tools (same as chatbot.py) / 工具定义（与 chatbot.py 相同） ---
 
 
 @tool
@@ -57,10 +57,11 @@ def search_web(query: str) -> str:
     return f"[Mock search] No TAVILY_API_KEY set. Query: '{query}'"
 
 
-# --- Create the agent in one line ---
+# --- Create the agent in one line (internally builds StateGraph + ToolNode + conditional edges) ---
+# --- 一行代码创建代理（内部自动构建 StateGraph + ToolNode + 条件边） ---
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-agent = create_react_agent(llm, tools=[get_current_time, calculator, search_web])
+agent = create_react_agent(llm, tools=[get_current_time, calculator, search_web])  # Equivalent to the full graph in chatbot.py / 等价于 chatbot.py 中手动构建的完整图
 
 # --- Interactive CLI ---
 
@@ -82,11 +83,11 @@ def main():
             print("Goodbye!")
             break
 
-        messages.append(HumanMessage(content=user_input))
-        result = agent.invoke({"messages": messages})
-        ai_message = result["messages"][-1]
+        messages.append(HumanMessage(content=user_input))  # Use HumanMessage object instead of dict / 使用 HumanMessage 对象而非字典
+        result = agent.invoke({"messages": messages})  # Invoke the prebuilt agent / 调用预构建代理
+        ai_message = result["messages"][-1]  # Get the final AI response / 获取最终 AI 回复
         print(f"\nAssistant: {ai_message.content}")
-        messages = result["messages"]
+        messages = result["messages"]  # Update conversation history / 更新对话历史
 
 
 if __name__ == "__main__":
