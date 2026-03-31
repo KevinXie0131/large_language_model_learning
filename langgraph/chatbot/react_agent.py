@@ -1,0 +1,93 @@
+"""
+LangGraph Chatbot with Tools - Using Prebuilt create_react_agent
+
+This is the simplified version of chatbot.py. It uses LangGraph's prebuilt
+create_react_agent() helper, which internally builds the same StateGraph
+(chatbot node → conditional edge → tool node → loop) in a single call.
+
+Compare this file with chatbot.py to see the difference between
+building a graph from scratch vs. using the prebuilt helper.
+"""
+
+import os
+from datetime import datetime
+
+from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+
+load_dotenv()
+
+# --- Tools (same as chatbot.py) ---
+
+
+@tool
+def get_current_time() -> str:
+    """Get the current date and time."""
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+@tool
+def calculator(expression: str) -> str:
+    """Evaluate a math expression. Example: '2 + 3 * 4'"""
+    allowed = set("0123456789+-*/(). ")
+    if not all(c in allowed for c in expression):
+        return "Error: expression contains invalid characters."
+    try:
+        result = eval(expression)
+        return str(result)
+    except Exception as e:
+        return f"Error: {e}"
+
+
+@tool
+def search_web(query: str) -> str:
+    """Search the web for information on a given query."""
+    if os.environ.get("TAVILY_API_KEY"):
+        try:
+            from langchain_tavily import TavilySearch
+
+            tavily = TavilySearch(max_results=3)
+            results = tavily.invoke(query)
+            return str(results)
+        except Exception as e:
+            return f"Tavily search failed: {e}"
+    return f"[Mock search] No TAVILY_API_KEY set. Query: '{query}'"
+
+
+# --- Create the agent in one line ---
+
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+agent = create_react_agent(llm, tools=[get_current_time, calculator, search_web])
+
+# --- Interactive CLI ---
+
+
+def main():
+    print("=" * 60)
+    print("  LangGraph Chatbot (create_react_agent Demo)")
+    print("  Tools: get_current_time, calculator, search_web")
+    print("  Type 'quit' to exit")
+    print("=" * 60)
+
+    messages = []
+
+    while True:
+        user_input = input("\nYou: ").strip()
+        if not user_input:
+            continue
+        if user_input.lower() in ("quit", "exit", "q"):
+            print("Goodbye!")
+            break
+
+        messages.append(HumanMessage(content=user_input))
+        result = agent.invoke({"messages": messages})
+        ai_message = result["messages"][-1]
+        print(f"\nAssistant: {ai_message.content}")
+        messages = result["messages"]
+
+
+if __name__ == "__main__":
+    main()
