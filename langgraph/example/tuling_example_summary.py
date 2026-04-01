@@ -15,8 +15,8 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 summarization_node = SummarizationNode(
     token_counter=count_tokens_approximately,
     model=llm,
-    max_tokens=1024,
-    max_summary_tokens=512,
+    max_tokens=256,
+    max_summary_tokens=128,
     output_messages_key="llm_input_messages",
 )
 
