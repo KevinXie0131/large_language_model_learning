@@ -1,3 +1,11 @@
+"""
+LangGraph 消息裁剪示例：基于 trim_messages 的上下文窗口管理
+
+演示如何使用 pre_model_hook + trim_messages 在调用大模型前裁剪历史消息，
+只保留最近的消息（按token数限制），避免超出模型的上下文窗口限制。
+与 tuling_example_summary.py 的区别：这里是直接截断旧消息，而不是生成摘要。
+"""
+
 from dotenv import load_dotenv
 from langchain_core.messages.utils import (
     trim_messages,
@@ -11,25 +19,27 @@ load_dotenv()
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 
-# This function will be called every time before the node that calls LLM
+# 模型调用前的钩子函数：每次调用LLM前自动裁剪历史消息
 def pre_model_hook(state):
     trimmed_messages = trim_messages(
         state["messages"],
-        strategy="last",
-        token_counter=count_tokens_approximately,
-        max_tokens=384,
-        start_on="human",
-        end_on=("human", "tool"),
+        strategy="last",       # 保留最新的消息（从末尾开始）
+        token_counter=count_tokens_approximately,  # 使用近似token计数
+        max_tokens=384,        # 最大保留384个token
+        start_on="human",      # 裁剪后的消息必须以human消息开头
+        end_on=("human", "tool"),  # 裁剪后的消息必须以human或tool消息结尾
     )
+    # 返回裁剪后的消息列表，作为实际发送给LLM的输入
     return {"llm_input_messages": trimmed_messages}
 
 
 checkpointer = InMemorySaver()
 
+# 创建Agent，绑定 pre_model_hook 实现消息裁剪
 agent = create_react_agent(
     model=llm,
-    tools=[],
-    pre_model_hook=pre_model_hook,
+    tools=[],                        # 无工具，纯对话Agent
+    pre_model_hook=pre_model_hook,   # 每次调用LLM前执行裁剪
     checkpointer=checkpointer,
 )
 
