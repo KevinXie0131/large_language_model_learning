@@ -1,27 +1,22 @@
+from typing import Any
+
+from dotenv import load_dotenv
+from langchain_core.messages.utils import count_tokens_approximately
+from langchain_openai import ChatOpenAI
+from langmem.short_term import SummarizationNode
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import create_react_agent
-from langchain_openai import ChatOpenAI
-
-import os
-from datetime import datetime
-from dotenv import load_dotenv
+from langgraph.prebuilt.chat_agent_executor import AgentState
 
 load_dotenv()
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-
-from langmem.short_term import SummarizationNode
-from langchain_core.messages.utils import count_tokens_approximately
-from langgraph.prebuilt import create_react_agent
-from langgraph.prebuilt.chat_agent_executor import AgentState
-from langgraph.checkpoint.memory import InMemorySaver
-from typing import Any
 
 # 使用大模型对历史信息进行总结
 summarization_node = SummarizationNode(
     token_counter=count_tokens_approximately,
     model=llm,
-    max_tokens=384,
-    max_summary_tokens=128,
+    max_tokens=1024,
+    max_summary_tokens=512,
     output_messages_key="llm_input_messages",
 )
 
@@ -62,7 +57,16 @@ if __name__ == "__main__":
         print(f"用户: {msg}")
         result = agent.invoke({"messages": [{"role": "user", "content": msg}]}, config)
         ai_reply = result["messages"][-1].content
-        print(f"AI: {ai_reply[:200]}")
+        print(f"AI: {ai_reply}")
+
+        # 打印总结后实际发送给大模型的消息
+        llm_input = result.get("llm_input_messages", [])
+        if llm_input:
+            print(f"  [总结后发送给LLM的消息数量: {len(llm_input)}]")
+            for m in llm_input:
+                m_role = getattr(m, "type", m.get("role", "unknown") if isinstance(m, dict) else "unknown")
+                m_content = getattr(m, "content", m.get("content", "") if isinstance(m, dict) else "")
+                print(f"    [{m_role}] {m_content[:200]}")
 
         # 查看当前状态中的消息数量和总结内容
         state = agent.get_state(config)
