@@ -1,0 +1,16 @@
+
+LangGraph CLI:
+
+pip install --upgrade "langgraph-cli[inmem]"
+
+pip show langgraph-cli
+
+C:\Users\KevinX\AppData\Roaming\Python\Python312\Scripts\langgraph new
+
+C:\Users\KevinX\AppData\Roaming\Python\Python312\Scripts\langgraph new C:\Backup\Tech\large_language_model_learning\langgraph\new1 --template new-langgraph-project-python
+
+C:\Users\KevinX\AppData\Roaming\Python\Python312\Scripts\langgraph dev
+
+curl -X POST http://localhost:2024/runs/stream  -H "Content-Type: application/json"  -d '{"assistant_id": "agent", "input": {"messages": [{"role": "user", "content": "hello"}]}, "stream_mode": ["values"]}'
+
+curl -X POST http://localhost:2024/runs/stream -H "Content-Type: application/json" -d "{\"assistant_id\": \"agent\", \"input\": {\"messages\": [{\"role\": \"user\", \"content\": \"hello\"}]}, \"stream_mode\": [\"values\"]}"
