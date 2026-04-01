@@ -354,5 +354,7 @@ if __name__ == "__main__":
 
     print("\n" + "=" * 50)
     print("流程执行完成！")
-    print("=" * 50)    
+    print("=" * 50)
     
+    with open("graph.png", "wb") as f:
+        f.write(app.get_graph().draw_mermaid_png())
