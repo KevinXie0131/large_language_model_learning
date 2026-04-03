@@ -1,3 +1,6 @@
+# https://www.bilibili.com/video/BV1HVFLzfEeS
+# 挑战19分钟搞定，LangGraph快速入门与原理剖析
+
 from typing import TypedDict, List, Dict, Any, Annotated
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
@@ -356,5 +359,5 @@ if __name__ == "__main__":
     print("流程执行完成！")
     print("=" * 50)
     
-    with open("graph.png", "wb") as f:
+    with open("example/graph.png", "wb") as f:
         f.write(app.get_graph().draw_mermaid_png())
