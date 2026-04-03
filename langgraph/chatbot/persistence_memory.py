@@ -1,17 +1,26 @@
 """
 LangGraph Persistence & Memory Demo
+LangGraph 持久化与记忆演示
 
 Shows how LangGraph's checkpointer system persists conversation state
 across turns and supports multiple independent conversation threads.
+展示 LangGraph 的检查点系统如何跨轮次持久化对话状态，并支持多个独立对话线程。
 
 Key LangGraph concepts demonstrated:
+演示的 LangGraph 关键概念：
   - MemorySaver: in-memory checkpointer that stores graph state
+    MemorySaver：存储图状态的内存检查点保存器
   - thread_id: unique identifier for each conversation thread
+    thread_id：每个对话线程的唯一标识符
   - State persistence: the graph remembers all previous messages per thread
+    状态持久化：图记住每个线程的所有历史消息
   - Thread switching: multiple independent conversations in parallel
+    线程切换：支持多个独立的并行对话
   - get_state(): inspect the current state of any thread
+    get_state()：检查任意线程的当前状态
 
 Graph structure (same as chatbot.py):
+图结构（与 chatbot.py 相同）：
   START → chatbot → (has tool calls?) → tools → chatbot → ... → END
 """
 
@@ -29,19 +38,21 @@ load_dotenv()
 
 # ---------------------------------------------------------------------------
 # 1. Tools
+# 1. 工具
 # ---------------------------------------------------------------------------
 
 
 @tool
 def get_current_time() -> str:
-    """Get the current date and time."""
+    """Get the current date and time. / 获取当前日期和时间。"""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 @tool
 def remember_fact(fact: str) -> str:
     """Store a fact that the user wants to remember. The fact is stored
-    in the conversation history and will be available in future turns."""
+    in the conversation history and will be available in future turns.
+    存储用户想记住的事实。该事实保存在对话历史中，在后续对话中可用。"""
     return f"Noted! I'll remember: {fact}"  # Fact stored in conversation history, persisted via checkpointer / 事实存储在对话历史中，通过检查点持久化
 
 
@@ -49,6 +60,7 @@ tools = [get_current_time, remember_fact]
 
 # ---------------------------------------------------------------------------
 # 2. LLM + Graph (same structure as chatbot.py)
+# 2. LLM + 图（与 chatbot.py 结构相同）
 # ---------------------------------------------------------------------------
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
@@ -85,6 +97,10 @@ graph.add_edge("tools", "chatbot")
 #    For real persistence, use SqliteSaver or PostgresSaver:
 #      from langgraph.checkpoint.sqlite import SqliteSaver
 #      checkpointer = SqliteSaver.from_conn_string("chat.db")
+# 3. 使用检查点编译
+#    检查点在每个图步骤后保存完整状态。每个 thread_id 有独立的状态。
+#    MemorySaver 存储在内存中（进程退出后丢失）。
+#    生产环境使用 SqliteSaver 或 PostgresSaver 实现持久存储。
 # ---------------------------------------------------------------------------
 
 # MemorySaver stores in RAM (lost when process exits). For real persistence, use SqliteSaver or PostgresSaver
@@ -94,6 +110,7 @@ app = graph.compile(checkpointer=checkpointer)  # Compile graph with checkpoint 
 
 # ---------------------------------------------------------------------------
 # 4. Interactive CLI with Thread Management
+# 4. 带线程管理的交互式命令行
 # ---------------------------------------------------------------------------
 
 HELP_TEXT = """
@@ -107,7 +124,7 @@ Commands:
 
 
 def show_thread_history(config):
-    """Display the message history for the current thread."""
+    """Display the message history for the current thread. / 显示当前线程的消息历史。"""
     state = app.get_state(config)  # Read full state of specified thread from checkpointer / 从检查点读取指定线程的完整状态
     if not state.values:
         print("  (no messages yet)")

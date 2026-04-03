@@ -1,16 +1,24 @@
 """
 LangGraph Streaming Demo
+LangGraph 流式输出演示
 
 Shows how to stream LLM tokens and graph events in real-time instead
 of waiting for the full response. Demonstrates multiple stream modes.
+展示如何实时流式输出 LLM token 和图事件，而不是等待完整响应。演示多种流式模式。
 
 Key LangGraph concepts demonstrated:
+演示的 LangGraph 关键概念：
   - stream_mode="updates": yields state updates from each node as they complete
+    stream_mode="updates"：每个节点完成时产出状态更新
   - stream_mode="messages": yields individual LLM tokens as they're generated
+    stream_mode="messages"：LLM 生成 token 时逐个产出
   - Real-time display of which graph nodes are executing
+    实时显示正在执行的图节点
   - Token-by-token output for a responsive chat experience
+    逐 token 输出，提供响应式聊天体验
 
 Graph structure (same as chatbot.py):
+图结构（与 chatbot.py 相同）：
   START → chatbot → (has tool calls?) → tools → chatbot → ... → END
 """
 
@@ -50,18 +58,19 @@ load_dotenv()
 
 # ---------------------------------------------------------------------------
 # 1. Tools (same as chatbot.py)
+# 1. 工具（与 chatbot.py 相同）
 # ---------------------------------------------------------------------------
 
 
 @tool
 def get_current_time() -> str:
-    """Get the current date and time."""
+    """Get the current date and time. / 获取当前日期和时间。"""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 @tool
 def calculator(expression: str) -> str:
-    """Evaluate a math expression. Example: '2 + 3 * 4'"""
+    """Evaluate a math expression. Example: '2 + 3 * 4' / 计算数学表达式。示例：'2 + 3 * 4'"""
     allowed = set("0123456789+-*/(). ")
     if not all(c in allowed for c in expression):
         return "Error: expression contains invalid characters."
@@ -74,7 +83,7 @@ def calculator(expression: str) -> str:
 
 @tool
 def search_web(query: str) -> str:
-    """Search the web for information on a given query."""
+    """Search the web for information on a given query. / 根据查询搜索网络信息。"""
     if os.environ.get("TAVILY_API_KEY"):
         try:
             from langchain_tavily import TavilySearch
@@ -91,6 +100,7 @@ tools = [get_current_time, calculator, search_web]
 
 # ---------------------------------------------------------------------------
 # 2. LLM + Graph
+# 2. LLM + 图
 # ---------------------------------------------------------------------------
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
@@ -122,15 +132,18 @@ app = graph.compile()
 
 # ---------------------------------------------------------------------------
 # 3. Streaming Functions
+# 3. 流式输出函数
 # ---------------------------------------------------------------------------
 
 
 def stream_updates(user_input: str, messages: list):
     """Stream mode: 'updates' - shows state updates from each node.
+    流式模式：'updates' - 显示每个节点的状态更新。
 
     This mode yields a dict for each node that runs, containing the
     state changes that node produced. Good for seeing the graph's
     step-by-step execution.
+    此模式为每个运行的节点产出一个字典，包含该节点产生的状态变更。适合查看图的逐步执行过程。
     """
     print("\n--- Streaming with mode='updates' ---")
     messages.append({"role": "user", "content": user_input})
@@ -162,10 +175,12 @@ def stream_updates(user_input: str, messages: list):
 
 def stream_tokens(user_input: str, messages: list):
     """Stream mode: 'messages' - streams individual LLM tokens.
+    流式模式：'messages' - 逐个流式输出 LLM token。
 
     This mode yields (message_chunk, metadata) tuples as the LLM
     generates each token. This is what you want for a real-time
     typing effect in a chat UI.
+    此模式在 LLM 生成每个 token 时产出 (message_chunk, metadata) 元组。适用于聊天界面的实时打字效果。
     """
     print("\n--- Streaming with mode='messages' ---")
     messages.append({"role": "user", "content": user_input})
@@ -188,6 +203,7 @@ def stream_tokens(user_input: str, messages: list):
 
 # ---------------------------------------------------------------------------
 # 4. Interactive CLI
+# 4. 交互式命令行
 # ---------------------------------------------------------------------------
 
 

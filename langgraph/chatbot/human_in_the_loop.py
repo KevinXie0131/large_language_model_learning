@@ -1,16 +1,24 @@
 """
 LangGraph Human-in-the-Loop Demo
+LangGraph 人机协作演示
 
 Shows how to pause graph execution for human approval before running
 sensitive tools, using LangGraph's interrupt() and Command(resume=...).
+展示如何在执行敏感工具前暂停图执行以获取人工审批，使用 interrupt() 和 Command(resume=...)。
 
 Key LangGraph concepts demonstrated:
+演示的 LangGraph 关键概念：
   - interrupt(): pauses the graph and returns control to the caller
+    interrupt()：暂停图执行并将控制权返回调用者
   - Command(resume=...): resumes the graph with a user-provided value
+    Command(resume=...)：使用用户提供的值恢复图执行
   - MemorySaver: in-memory checkpointer (required for interrupt to work)
+    MemorySaver：内存检查点保存器（interrupt 工作的必要条件）
   - thread_id: identifies a conversation thread for checkpointing
+    thread_id：标识对话线程，用于检查点管理
 
 Graph structure:
+图结构：
   START → chatbot → (has tool calls?) → approval → (approved?) → tools → chatbot
                        ↘ (no)                        ↘ (denied)
                         END                            END
@@ -32,24 +40,25 @@ load_dotenv()
 
 # ---------------------------------------------------------------------------
 # 1. Define Tools - split into safe and sensitive categories
+# 1. 定义工具 - 按安全和敏感类别划分
 # ---------------------------------------------------------------------------
 
 
 @tool
 def get_current_time() -> str:
-    """Get the current date and time."""
+    """Get the current date and time. / 获取当前日期和时间。"""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 @tool
 def send_email(to: str, subject: str, body: str) -> str:
-    """Send an email to a recipient. (Simulated)"""
+    """Send an email to a recipient. (Simulated) / 向收件人发送邮件。（模拟）"""
     return f"Email sent to {to} with subject '{subject}'"
 
 
 @tool
 def delete_file(filename: str) -> str:
-    """Delete a file from the system. (Simulated)"""
+    """Delete a file from the system. (Simulated) / 从系统中删除文件。（模拟）"""
     return f"File '{filename}' has been deleted."
 
 
@@ -61,6 +70,7 @@ sensitive_tool_names = {t.name for t in sensitive_tools}  # Set of sensitive too
 
 # ---------------------------------------------------------------------------
 # 2. LLM setup
+# 2. LLM 配置
 # ---------------------------------------------------------------------------
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
@@ -68,21 +78,25 @@ llm_with_tools = llm.bind_tools(all_tools)
 
 # ---------------------------------------------------------------------------
 # 3. Graph Nodes
+# 3. 图节点
 # ---------------------------------------------------------------------------
 
 
 def chatbot_node(state: MessagesState):
-    """Call the LLM. It may respond with text or tool_calls."""
+    """Call the LLM. It may respond with text or tool_calls. / 调用 LLM，可能返回文本或工具调用。"""
     response = llm_with_tools.invoke(state["messages"])
     return {"messages": [response]}
 
 
 def human_approval_node(state: MessagesState):
     """If the LLM requested sensitive tools, pause for human approval.
+    如果 LLM 请求了敏感工具，暂停等待人工审批。
 
     interrupt() saves the graph state and returns control to the caller.
     When the caller resumes with Command(resume=value), this function
     continues and `approval` receives that value.
+    interrupt() 保存图状态并将控制权返回调用者。
+    当调用者使用 Command(resume=value) 恢复时，此函数继续执行，`approval` 接收该值。
     """
     last_message = state["messages"][-1]
     sensitive_calls = [
@@ -111,6 +125,7 @@ tool_node = ToolNode(all_tools)
 
 # ---------------------------------------------------------------------------
 # 4. Routing Functions
+# 4. 路由函数
 # ---------------------------------------------------------------------------
 
 
@@ -122,7 +137,7 @@ def should_use_tools(state: MessagesState) -> str:
 
 
 def after_approval(state: MessagesState) -> str:
-    """After approval node: route to tools if still has tool_calls, else END."""
+    """After approval node: route to tools if still has tool_calls, else END. / 审批节点后：如果仍有工具调用则路由到工具节点，否则结束。"""
     last_message = state["messages"][-1]
     if hasattr(last_message, "tool_calls") and last_message.tool_calls:
         return "tools"
@@ -131,6 +146,7 @@ def after_approval(state: MessagesState) -> str:
 
 # ---------------------------------------------------------------------------
 # 5. Build the Graph
+# 5. 构建图
 # ---------------------------------------------------------------------------
 
 graph = StateGraph(MessagesState)
@@ -151,6 +167,7 @@ app = graph.compile(checkpointer=memory)  # Compile graph with checkpointing / �
 
 # ---------------------------------------------------------------------------
 # 6. Interactive CLI
+# 6. 交互式命令行
 # ---------------------------------------------------------------------------
 
 

@@ -1,17 +1,25 @@
 """
 LangGraph Multi-Agent Supervisor Demo
+LangGraph 多代理主管演示
 
 Shows how to build a supervisor agent that routes tasks to specialized
 worker agents (researcher, coder), then synthesizes their outputs.
+展示如何构建一个主管代理，将任务路由给专业工作代理（研究员、编码员），然后综合其输出。
 
 Key LangGraph concepts demonstrated:
+演示的 LangGraph 关键概念：
   - Multi-agent coordination via a supervisor node
+    通过主管节点进行多代理协调
   - Structured output (with_structured_output) for routing decisions
+    使用结构化输出（with_structured_output）做路由决策
   - Typed state with custom fields beyond just messages
+    带有自定义字段的类型化状态（不仅仅是消息）
   - Worker agents as separate graph nodes with specialized system prompts
+    工作代理作为独立图节点，拥有专门的系统提示
 
 Graph structure:
-  START → supervisor → (route) → researcher → supervisor
+图结构：
+  START → supervisor →（路由）→ researcher → supervisor
                                → coder      → supervisor
                                → FINISH     → END
 """
@@ -30,13 +38,15 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 # 1. Define the routing schema
 #    The supervisor uses structured output to pick the next worker.
+# 1. 定义路由模式
+#    主管使用结构化输出来选择下一个工作代理。
 # ---------------------------------------------------------------------------
 
 WORKERS = ["researcher", "coder"]
 
 
 class RouterOutput(BaseModel):
-    """The supervisor's routing decision."""
+    """The supervisor's routing decision. / 主管的路由决策。"""
 
     next: Literal["researcher", "coder", "FINISH"]  # Next routing target / 下一步路由目标
     reason: str  # Routing reason / 路由原因说明
@@ -44,12 +54,14 @@ class RouterOutput(BaseModel):
 
 # ---------------------------------------------------------------------------
 # 2. LLM setup
+# 2. LLM 配置
 # ---------------------------------------------------------------------------
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 # ---------------------------------------------------------------------------
 # 3. Supervisor Node
+# 3. 主管节点
 # ---------------------------------------------------------------------------
 
 SUPERVISOR_SYSTEM = """You are a team supervisor managing two workers:
@@ -64,7 +76,7 @@ Always explain your routing reason briefly."""
 
 
 def supervisor_node(state: MessagesState):
-    """Decide which worker to call next, or finish."""
+    """Decide which worker to call next, or finish. / 决定下一步调用哪个工作代理，或结束。"""
     structured_llm = llm.with_structured_output(RouterOutput)  # Constrain LLM output to RouterOutput schema / 约束 LLM 输出为 RouterOutput 结构
     response = structured_llm.invoke(
         [SystemMessage(content=SUPERVISOR_SYSTEM)] + state["messages"]
@@ -78,6 +90,8 @@ def supervisor_node(state: MessagesState):
 # 4. Worker Nodes
 #    Each worker has a specialized system prompt. Their responses are
 #    added back to the shared message history tagged with their name.
+# 4. 工作节点
+#    每个工作代理有专门的系统提示。它们的响应带有名称标签添加回共享消息历史。
 # ---------------------------------------------------------------------------
 
 RESEARCHER_SYSTEM = """You are a research assistant. Your job is to:
@@ -98,7 +112,7 @@ Respond with your code and explanation."""
 
 
 def researcher_node(state: MessagesState):
-    """Research worker - gathers information."""
+    """Research worker - gathers information. / 研究员 - 收集信息。"""
     response = llm.invoke(
         [SystemMessage(content=RESEARCHER_SYSTEM)] + state["messages"]  # Use researcher-specific system prompt / 使用研究员专属系统提示
     )
@@ -110,7 +124,7 @@ def researcher_node(state: MessagesState):
 
 
 def coder_node(state: MessagesState):
-    """Coder worker - writes and explains code."""
+    """Coder worker - writes and explains code. / 编码员 - 编写和解释代码。"""
     response = llm.invoke(
         [SystemMessage(content=CODER_SYSTEM)] + state["messages"]  # Use coder-specific system prompt / 使用编码员专属系统提示
     )
@@ -121,11 +135,12 @@ def coder_node(state: MessagesState):
 
 # ---------------------------------------------------------------------------
 # 5. Routing Function
+# 5. 路由函数
 # ---------------------------------------------------------------------------
 
 
 def route_supervisor(state: MessagesState) -> str:
-    """Route based on the supervisor's decision stored in state."""
+    """Route based on the supervisor's decision stored in state. / 根据状态中存储的主管决策进行路由。"""
     next_worker = state.get("next", "FINISH")  # Read routing decision from state / 从状态中读取路由决定
     if next_worker == "FINISH":
         return END  # Task complete, end graph / 任务完成，结束图
@@ -134,6 +149,7 @@ def route_supervisor(state: MessagesState) -> str:
 
 # ---------------------------------------------------------------------------
 # 6. Build the Graph
+# 6. 构建图
 # ---------------------------------------------------------------------------
 
 # Use a custom state that includes a "next" field for routing
@@ -167,6 +183,7 @@ app = graph.compile()
 
 # ---------------------------------------------------------------------------
 # 7. Interactive CLI
+# 7. 交互式命令行
 # ---------------------------------------------------------------------------
 
 

@@ -1,20 +1,29 @@
 """
 LangGraph RAG (Retrieval-Augmented Generation) Agent Demo
+LangGraph RAG（检索增强生成）代理演示
 
 Shows how to build an agent that retrieves relevant documents from a
 vector store before answering questions, combining search with generation.
+展示如何构建一个在回答问题前从向量存储中检索相关文档的代理，将搜索与生成相结合。
 
 Key LangGraph concepts demonstrated:
+演示的 LangGraph 关键概念：
   - Tool-based retrieval: vector search exposed as a LangGraph tool
+    基于工具的检索：向量搜索作为 LangGraph 工具暴露
   - InMemoryVectorStore: simple vector store for demo purposes
+    InMemoryVectorStore：用于演示的简单内存向量存储
   - OpenAIEmbeddings: converts text to vectors for similarity search
+    OpenAIEmbeddings：将文本转换为向量以进行相似度搜索
   - Combining retrieval tool with other tools in a ReAct agent
+    在 ReAct 代理中将检索工具与其他工具组合使用
 
 Graph structure (same ReAct loop as chatbot.py):
+图结构（与 chatbot.py 相同的 ReAct 循环）：
   START → chatbot → (has tool calls?) → tools → chatbot → ... → END
 
 The key difference: one of the tools performs vector similarity search
 over a knowledge base, grounding the LLM's answers in retrieved context.
+关键区别：其中一个工具对知识库执行向量相似度搜索，使 LLM 的回答基于检索到的上下文。
 """
 
 import os
@@ -33,6 +42,8 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 # 1. Create a sample knowledge base
 #    In production, you'd load these from files, databases, or web scraping.
+# 1. 创建示例知识库
+#    生产环境中，通常从文件、数据库或网页抓取加载数据。
 # ---------------------------------------------------------------------------
 
 SAMPLE_DOCUMENTS = [
@@ -111,6 +122,7 @@ SAMPLE_DOCUMENTS = [
 
 # ---------------------------------------------------------------------------
 # 2. Build the vector store
+# 2. 构建向量存储
 # ---------------------------------------------------------------------------
 
 print("Building vector store from sample documents...")
@@ -123,6 +135,7 @@ print(f"Indexed {len(SAMPLE_DOCUMENTS)} documents.\n")
 
 # ---------------------------------------------------------------------------
 # 3. Define Tools
+# 3. 定义工具
 # ---------------------------------------------------------------------------
 
 
@@ -130,7 +143,8 @@ print(f"Indexed {len(SAMPLE_DOCUMENTS)} documents.\n")
 def search_knowledge_base(query: str) -> str:
     """Search the knowledge base for relevant information about LangGraph.
     Use this tool when the user asks about LangGraph concepts, features,
-    or implementation details."""
+    or implementation details.
+    搜索知识库获取 LangGraph 相关信息。当用户询问 LangGraph 概念、功能或实现细节时使用。"""
     docs = retriever.invoke(query)  # Execute vector similarity search / 执行向量相似度搜索
     if not docs:
         return "No relevant documents found."
@@ -146,7 +160,7 @@ def search_knowledge_base(query: str) -> str:
 
 @tool
 def get_current_time() -> str:
-    """Get the current date and time."""
+    """Get the current date and time. / 获取当前日期和时间。"""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
@@ -154,6 +168,7 @@ tools = [search_knowledge_base, get_current_time]
 
 # ---------------------------------------------------------------------------
 # 4. LLM + Graph
+# 4. LLM + 图
 # ---------------------------------------------------------------------------
 
 SYSTEM_PROMPT = """You are a helpful assistant with access to a knowledge base
@@ -199,6 +214,7 @@ app = graph.compile()
 
 # ---------------------------------------------------------------------------
 # 5. Interactive CLI
+# 5. 交互式命令行
 # ---------------------------------------------------------------------------
 
 

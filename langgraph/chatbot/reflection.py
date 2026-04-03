@@ -1,17 +1,25 @@
 """
 LangGraph Reflection / Self-Correction Demo
+LangGraph 反思/自我纠正演示
 
 Shows how to build an agent that generates content, critiques its own
 output, and iteratively refines it until quality is satisfactory.
+展示如何构建一个生成内容、自我评价并迭代优化直到质量满意的代理。
 
 Key LangGraph concepts demonstrated:
+演示的 LangGraph 关键概念：
   - Custom state with fields beyond messages (draft, critique, iteration)
+    自定义状态：包含消息之外的字段（草稿、评论、迭代次数）
   - Iterative loops: generate → reflect → (good enough?) → generate → ...
+    迭代循环：生成 → 反思 →（质量够好？）→ 生成 → ...
   - Conditional edges based on custom logic (iteration count, quality)
+    基于自定义逻辑的条件边（迭代次数、质量评级）
   - Using different system prompts for different nodes (writer vs. critic)
+    不同节点使用不同系统提示（写作者 vs. 评论者）
 
 Graph structure:
-  START → writer → critic → (needs revision?) → writer → critic → ... → END
+图结构：
+  START → writer → critic →（需要修订？）→ writer → critic → ... → END
 """
 
 import os
@@ -27,6 +35,8 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 # 1. Custom State
 #    Beyond just messages, we track the draft, critique, and iteration count.
+# 1. 自定义状态
+#    除了消息之外，还跟踪草稿、评论和迭代次数。
 # ---------------------------------------------------------------------------
 
 MAX_ITERATIONS = 3  # Maximum reflection iterations / 最大反思迭代次数
@@ -42,12 +52,14 @@ class ReflectionState(TypedDict):
 
 # ---------------------------------------------------------------------------
 # 2. LLM setup
+# 2. LLM 配置
 # ---------------------------------------------------------------------------
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)  # temperature 0.7: moderate creativity, good for writing / 温度0.7：适度创造性，适合写作任务
 
 # ---------------------------------------------------------------------------
 # 3. Graph Nodes
+# 3. 图节点
 # ---------------------------------------------------------------------------
 
 WRITER_SYSTEM = """You are an expert writer. Write or revise content based on
@@ -68,7 +80,7 @@ Start your response with the rating on its own line, then provide feedback."""
 
 
 def writer_node(state: ReflectionState):
-    """Generate or revise the draft based on the topic and any critique."""
+    """Generate or revise the draft based on the topic and any critique. / 根据主题和评论生成或修订草稿。"""
     messages = [SystemMessage(content=WRITER_SYSTEM)]
 
     if state.get("critique"):  # Has critique feedback → enter revision mode / 有评论反馈 → 进入修订模式
@@ -101,7 +113,7 @@ def writer_node(state: ReflectionState):
 
 
 def critic_node(state: ReflectionState):
-    """Critique the current draft."""
+    """Critique the current draft. / 评价当前草稿。"""
     messages = [
         SystemMessage(content=CRITIC_SYSTEM),
         HumanMessage(
@@ -118,11 +130,12 @@ def critic_node(state: ReflectionState):
 
 # ---------------------------------------------------------------------------
 # 4. Routing: should we revise again or finish?
+# 4. 路由：继续修订还是完成？
 # ---------------------------------------------------------------------------
 
 
 def should_revise(state: ReflectionState) -> str:
-    """Check if the draft needs more revision."""
+    """Check if the draft needs more revision. / 检查草稿是否需要进一步修订。"""
     critique = state.get("critique", "")
     iteration = state.get("iteration", 0)
 
@@ -140,6 +153,7 @@ def should_revise(state: ReflectionState) -> str:
 
 # ---------------------------------------------------------------------------
 # 5. Build the Graph
+# 5. 构建图
 # ---------------------------------------------------------------------------
 
 graph = StateGraph(ReflectionState)
@@ -159,6 +173,7 @@ app = graph.compile()
 
 # ---------------------------------------------------------------------------
 # 6. Interactive CLI
+# 6. 交互式命令行
 # ---------------------------------------------------------------------------
 
 

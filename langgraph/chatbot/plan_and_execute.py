@@ -1,20 +1,28 @@
 """
 LangGraph Plan-and-Execute Demo
+LangGraph 计划与执行演示
 
 Shows how to build an agent that first creates a step-by-step plan,
 then executes each step, and re-plans if needed.
+展示如何构建一个先制定分步计划、然后逐步执行、并在需要时重新规划的代理。
 
 Key LangGraph concepts demonstrated:
+演示的 LangGraph 关键概念：
   - Two-phase agent: planning then execution
+    两阶段代理：先规划后执行
   - Custom state with plan list, step tracking, and results
+    自定义状态：包含计划列表、步骤跟踪和执行结果
   - Conditional looping: execute steps until plan is complete
+    条件循环：执行步骤直到计划完成
   - Dynamic re-planning based on execution results
+    基于执行结果的动态重新规划
 
 Graph structure:
-  START → planner → executor → (more steps?) → executor → ...
-                                  ↘ (done)
-                        re-planner → (needs changes?) → executor
-                                       ↘ (no)
+图结构：
+  START → planner → executor →（还有步骤？）→ executor → ...
+                                  ↘（完成）
+                        re-planner →（需要调整？）→ executor
+                                       ↘（不需要）
                                         END
 """
 
@@ -30,6 +38,7 @@ load_dotenv()
 
 # ---------------------------------------------------------------------------
 # 1. Custom State
+# 1. 自定义状态
 # ---------------------------------------------------------------------------
 
 
@@ -43,12 +52,14 @@ class PlanExecuteState(TypedDict):
 
 # ---------------------------------------------------------------------------
 # 2. LLM setup
+# 2. LLM 配置
 # ---------------------------------------------------------------------------
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 # ---------------------------------------------------------------------------
 # 3. Graph Nodes
+# 3. 图节点
 # ---------------------------------------------------------------------------
 
 PLANNER_SYSTEM = """You are a planning agent. Given a task, create a clear
@@ -65,7 +76,7 @@ results into a final answer."""
 
 
 def planner_node(state: PlanExecuteState):
-    """Create the initial plan."""
+    """Create the initial plan. / 创建初始计划。"""
     messages = [
         SystemMessage(content=PLANNER_SYSTEM),
         HumanMessage(content=f"Create a plan for: {state['task']}"),
@@ -91,7 +102,7 @@ If you need information from previous steps, it will be provided as context."""
 
 
 def executor_node(state: PlanExecuteState):
-    """Execute the current step of the plan."""
+    """Execute the current step of the plan. / 执行计划的当前步骤。"""
     step_idx = state["current_step"]
     current_step = state["plan"][step_idx]  # Get the current step to execute / 获取当前待执行的步骤
     previous_results = state.get("results", [])
@@ -127,7 +138,7 @@ If the plan needs changes, output a revised plan as a numbered list."""
 
 
 def replanner_node(state: PlanExecuteState):
-    """Check if the plan needs adjustment after executing steps."""
+    """Check if the plan needs adjustment after executing steps. / 执行步骤后检查计划是否需要调整。"""
     messages = [
         SystemMessage(content=REPLANNER_SYSTEM),
         HumanMessage(
@@ -171,18 +182,19 @@ def replanner_node(state: PlanExecuteState):
 
 # ---------------------------------------------------------------------------
 # 4. Routing Functions
+# 4. 路由函数
 # ---------------------------------------------------------------------------
 
 
 def should_continue_executing(state: PlanExecuteState) -> str:
-    """After executing a step, check if there are more steps."""
+    """After executing a step, check if there are more steps. / 执行一步后检查是否还有更多步骤。"""
     if state["current_step"] >= len(state["plan"]):  # All steps executed / 所有步骤执行完毕
         return "replanner"  # Hand off to replanner for evaluation / 交给重新规划者评估
     return "executor"  # Continue executing next step / 继续执行下一步
 
 
 def after_replan(state: PlanExecuteState) -> str:
-    """After re-planning, check if we're done or need to keep going."""
+    """After re-planning, check if we're done or need to keep going. / 重新规划后检查是否完成或需要继续。"""
     if state.get("final_answer"):  # Has final answer → task complete / 有最终答案 → 任务完成
         return END
     return "executor"  # New plan needs continued execution / 新计划需要继续执行
@@ -190,6 +202,7 @@ def after_replan(state: PlanExecuteState) -> str:
 
 # ---------------------------------------------------------------------------
 # 5. Build the Graph
+# 5. 构建图
 # ---------------------------------------------------------------------------
 
 graph = StateGraph(PlanExecuteState)
@@ -207,6 +220,7 @@ app = graph.compile()
 
 # ---------------------------------------------------------------------------
 # 6. Interactive CLI
+# 6. 交互式命令行
 # ---------------------------------------------------------------------------
 
 

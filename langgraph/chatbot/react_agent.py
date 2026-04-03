@@ -1,12 +1,16 @@
 """
 LangGraph Chatbot with Tools - Using Prebuilt create_react_agent
+LangGraph 工具聊天机器人 - 使用预构建的 create_react_agent
 
 This is the simplified version of chatbot.py. It uses LangGraph's prebuilt
 create_react_agent() helper, which internally builds the same StateGraph
 (chatbot node → conditional edge → tool node → loop) in a single call.
+这是 chatbot.py 的简化版本。使用 LangGraph 预构建的 create_react_agent() 辅助函数，
+它在内部自动构建相同的 StateGraph（chatbot 节点 → 条件边 → tool 节点 → 循环）。
 
 Compare this file with chatbot.py to see the difference between
 building a graph from scratch vs. using the prebuilt helper.
+将此文件与 chatbot.py 对比，了解从零构建图与使用预构建辅助函数的区别。
 """
 
 import os
@@ -25,13 +29,13 @@ load_dotenv()
 
 @tool
 def get_current_time() -> str:
-    """Get the current date and time."""
+    """Get the current date and time. / 获取当前日期和时间。"""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 @tool
 def calculator(expression: str) -> str:
-    """Evaluate a math expression. Example: '2 + 3 * 4'"""
+    """Evaluate a math expression. Example: '2 + 3 * 4' / 计算数学表达式。示例：'2 + 3 * 4'"""
     allowed = set("0123456789+-*/(). ")
     if not all(c in allowed for c in expression):
         return "Error: expression contains invalid characters."
@@ -44,7 +48,7 @@ def calculator(expression: str) -> str:
 
 @tool
 def search_web(query: str) -> str:
-    """Search the web for information on a given query."""
+    """Search the web for information on a given query. / 根据查询搜索网络信息。"""
     if os.environ.get("TAVILY_API_KEY"):
         try:
             from langchain_tavily import TavilySearch
@@ -64,6 +68,7 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 agent = create_react_agent(llm, tools=[get_current_time, calculator, search_web])  # Equivalent to the full graph in chatbot.py / 等价于 chatbot.py 中手动构建的完整图
 
 # --- Interactive CLI ---
+# --- 交互式命令行 ---
 
 
 def main():
