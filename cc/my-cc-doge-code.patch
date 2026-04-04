@@ -1,0 +1,241 @@
+Index: src/components/ConsoleOAuthFlow.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/components/ConsoleOAuthFlow.tsx b/src/components/ConsoleOAuthFlow.tsx
+--- a/src/components/ConsoleOAuthFlow.tsx	(revision ded9961bf4bef6c4309a4685866a6091f5ebee6a)
++++ b/src/components/ConsoleOAuthFlow.tsx	(revision 4dac8ef80c79065b23be72d443d402ba0ab84a42)
+@@ -191,6 +191,7 @@
+     const nextApiKey = customApiKey.trim();
+     const nextModel = customModel.trim();
+     const normalizedKey = nextApiKey ? normalizeApiKeyForConfig(nextApiKey) : null;
++    const nextSavedModels = nextModel ? [...new Set([...(persistedCustomApiEndpoint.savedModels ?? []), nextModel])] : persistedCustomApiEndpoint.savedModels ?? [];
+     process.env.ANTHROPIC_BASE_URL = nextBaseURL;
+     process.env.DOGE_API_KEY = nextApiKey;
+     process.env.ANTHROPIC_MODEL = nextModel;
+@@ -200,7 +201,8 @@
+         provider: compatibleApiProvider,
+         baseURL: nextBaseURL,
+         apiKey: undefined,
+-        model: nextModel
++        model: nextModel,
++        savedModels: nextSavedModels
+       },
+       customApiKeyResponses: normalizedKey ? {
+         approved: [...new Set([...(current.customApiKeyResponses?.approved ?? []), normalizedKey])],
+@@ -212,7 +214,7 @@
+       baseURL: nextBaseURL,
+       apiKey: nextApiKey,
+       model: nextModel,
+-      savedModels: persistedCustomApiEndpoint.savedModels ?? []
++      savedModels: nextSavedModels
+     });
+   }, [compatibleApiProvider, customApiKey, customBaseURL, customModel, persistedCustomApiEndpoint.savedModels]);
+   const handleSubmitCustomConfig = useCallback((value: string) => {
+Index: src/components/Settings/Config.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/components/Settings/Config.tsx b/src/components/Settings/Config.tsx
+--- a/src/components/Settings/Config.tsx	(revision ded9961bf4bef6c4309a4685866a6091f5ebee6a)
++++ b/src/components/Settings/Config.tsx	(revision 4dac8ef80c79065b23be72d443d402ba0ab84a42)
+@@ -314,11 +314,13 @@
+     type: 'managedEnum' as const,
+     onChange(value: string) {
+       const nextValue = value === 'Not set' ? '' : value;
++      const nextSavedModels = nextValue ? [...new Set([...(getGlobalConfig().customApiEndpoint?.savedModels ?? []), nextValue])] : getGlobalConfig().customApiEndpoint?.savedModels;
+       saveGlobalConfig(current => ({
+         ...current,
+         customApiEndpoint: {
+           ...current.customApiEndpoint,
+-          model: nextValue
++          model: nextValue,
++          savedModels: nextSavedModels
+         }
+       }));
+       if (nextValue) {
+Index: src/utils/model/agent.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/utils/model/agent.ts b/src/utils/model/agent.ts
+--- a/src/utils/model/agent.ts	(revision ded9961bf4bef6c4309a4685866a6091f5ebee6a)
++++ b/src/utils/model/agent.ts	(revision 4dac8ef80c79065b23be72d443d402ba0ab84a42)
+@@ -141,7 +141,12 @@
+     .map(model => model.trim())
+     .filter(Boolean)
+ 
+-  if (customModels.length > 0) {
++  const customApiProvider =
++    readCustomApiStorage().provider ??
++    getGlobalConfig().customApiEndpoint?.provider ??
++    'anthropic'
++
++  if (customApiProvider === 'openai' || customModels.length > 0) {
+     return [
+       ...[...new Set(customModels)].map(model => ({
+         value: model,
+Index: src/hooks/useTextInput.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/hooks/useTextInput.ts b/src/hooks/useTextInput.ts
+--- a/src/hooks/useTextInput.ts	(revision ed2655b1653c25602901b53801a01a47df5b41f1)
++++ b/src/hooks/useTextInput.ts	(revision 26dd129c3a505ebe2a9367a6c170ec167358d163)
+@@ -245,6 +245,10 @@
+   ])
+ 
+   function handleEnter(key: Key) {
++    const fs = require('fs')
++    fs.appendFileSync('C:\\temp\\debug.log', `[TRACE] 按下了回车！输入了：${originalValue}\n`)
++
++
+     if (
+       multiline &&
+       cursor.offset > 0 &&
+Index: src/query.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/query.ts b/src/query.ts
+--- a/src/query.ts	(revision ed2655b1653c25602901b53801a01a47df5b41f1)
++++ b/src/query.ts	(revision 26dd129c3a505ebe2a9367a6c170ec167358d163)
+@@ -288,6 +288,11 @@
+   | ToolUseSummaryMessage,
+   Terminal
+ > {
++
++  const fs = require('fs')
++  fs.appendFileSync('C:\\temp\\debug.log', `[TRACE] queryLoop\n`);
++
++
+   // Immutable params — never reassigned during the query loop.
+   const {
+     systemPrompt,
+Index: src/screens/REPL.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/screens/REPL.tsx b/src/screens/REPL.tsx
+--- a/src/screens/REPL.tsx	(revision ed2655b1653c25602901b53801a01a47df5b41f1)
++++ b/src/screens/REPL.tsx	(revision 26dd129c3a505ebe2a9367a6c170ec167358d163)
+@@ -2615,6 +2615,11 @@
+   });
+   const onQueryEvent = useCallback((event: Parameters<typeof handleMessageFromStream>[0]) => {
+     handleMessageFromStream(event, newMessage => {
++
++
++      const fs = require('fs')
++      fs.appendFileSync('C:\\temp\\debug.log', `[TRACE] onQueryEvent\n`);
++
+       if (isCompactBoundaryMessage(newMessage)) {
+         // Fullscreen: keep pre-compact messages for scrollback. query.ts
+         // slices at the boundary for API calls, Messages.tsx skips the
+@@ -2885,6 +2890,11 @@
+     await onTurnComplete?.(messagesRef.current);
+   }, [initialMcpClients, resetLoadingState, getToolUseContext, toolPermissionContext, setAppState, customSystemPrompt, onTurnComplete, appendSystemPrompt, canUseTool, mainThreadAgentDefinition, onQueryEvent, sessionTitle, titleDisabled]);
+   const onQuery = useCallback(async (newMessages: MessageType[], abortController: AbortController, shouldQuery: boolean, additionalAllowedTools: string[], mainLoopModelParam: string, onBeforeQueryCallback?: (input: string, newMessages: MessageType[]) => Promise<boolean>, input?: string, effort?: EffortValue): Promise<void> => {
++
++    const fs = require('fs')
++    fs.appendFileSync('C:\\temp\\debug.log', `[TRACE] onQuery\n`);
++
++
+     // If this is a teammate, mark them as active when starting a turn
+     if (isAgentSwarmsEnabled()) {
+       const teamName = getTeamName();
+Index: src/services/api/claude.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/services/api/claude.ts b/src/services/api/claude.ts
+--- a/src/services/api/claude.ts	(revision ed2655b1653c25602901b53801a01a47df5b41f1)
++++ b/src/services/api/claude.ts	(revision 26dd129c3a505ebe2a9367a6c170ec167358d163)
+@@ -779,6 +779,10 @@
+   StreamEvent | AssistantMessage | SystemAPIErrorMessage,
+   void
+ > {
++  const fs = require('fs')
++  fs.appendFileSync('C:\\temp\\debug.log', `[TRACE] queryModelWithStreaming\n`);
++
++
+   return yield* withStreamingVCR(messages, async function* () {
+     yield* queryModel(
+       messages,
+@@ -1834,6 +1838,10 @@
+         // BetaMessageStream calls partialParse() on every input_json_delta, which we don't need
+         // since we handle tool input accumulation ourselves
+         // biome-ignore lint/plugin: main conversation loop handles attribution separately
++
++        const fs = require('fs')
++        fs.appendFileSync('C:\\temp\\debug.log', `\n\n【请求大模型】：${JSON.stringify(params)} \n`)
++
+         const compatProvider = readCustomApiStorage().provider ?? 'anthropic'
+         if (compatProvider === 'openai') {
+           const openAIRequest = convertAnthropicRequestToOpenAI({
+@@ -2371,6 +2379,9 @@
+       // Clear the idle timeout watchdog now that the stream loop has exited
+       clearStreamIdleTimers()
+ 
++      const fs = require('fs')
++      fs.appendFileSync('C:\\temp\\dbug.log', `\n\n 【收到大模型响应】：${JSON.stringify(newMessages)}\n`)
++
+       // If the stream was aborted by our idle timeout watchdog, fall back to
+       // non-streaming retry rather than treating it as a completed stream.
+       if (streamIdleAborted) {
+Index: src/utils/handlePromptSubmit.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/utils/handlePromptSubmit.ts b/src/utils/handlePromptSubmit.ts
+--- a/src/utils/handlePromptSubmit.ts	(revision ed2655b1653c25602901b53801a01a47df5b41f1)
++++ b/src/utils/handlePromptSubmit.ts	(revision 26dd129c3a505ebe2a9367a6c170ec167358d163)
+@@ -120,6 +120,10 @@
+ export async function handlePromptSubmit(
+   params: HandlePromptSubmitParams,
+ ): Promise<void> {
++
++  const fs = require('fs')
++  fs.appendFileSync('C:\\temp\\debug.log', `[TRACE] handlePromptSubmit\n`);
++
+   const {
+     helpers,
+     queryGuard,
+@@ -394,6 +398,10 @@
+  * get `skipAttachments` to avoid duplicating turn-level context.
+  */
+ async function executeUserInput(params: ExecuteUserInputParams): Promise<void> {
++  const fs = require('fs')
++  fs.appendFileSync('C:\\temp\\debug.log', `[TRACE] executeUserInput\n`);
++
++
+   const {
+     messages,
+     mainLoopModel,
+Index: src/utils/processUserInput/processUserInput.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/utils/processUserInput/processUserInput.ts b/src/utils/processUserInput/processUserInput.ts
+--- a/src/utils/processUserInput/processUserInput.ts	(revision ed2655b1653c25602901b53801a01a47df5b41f1)
++++ b/src/utils/processUserInput/processUserInput.ts	(revision 26dd129c3a505ebe2a9367a6c170ec167358d163)
+@@ -138,6 +138,11 @@
+   isMeta?: boolean
+   skipAttachments?: boolean
+ }): Promise<ProcessUserInputBaseResult> {
++
++  const fs = require('fs')
++  fs.appendFileSync('C:\\temp\\debug.log', `[TRACE] processUserInput\n`);
++
++
+   const inputString = typeof input === 'string' ? input : null
+   // Immediately show the user input prompt while we are still processing the input.
+   // Skip for isMeta (system-generated prompts like scheduled tasks) — those
