@@ -7,12 +7,10 @@ load_dotenv()
 from fastapi import FastAPI  # noqa: E402
 from langserve import add_routes  # noqa: E402
 
-from agents import (  # noqa: E402
-    chatbot_graph,
-    react_agent_graph,
-    rag_agent_graph,
-    multi_agent_graph,
-)
+from chatbot import graph as chatbot_graph  # noqa: E402
+from react_agent import graph as react_agent_graph  # noqa: E402
+from rag_agent import graph as rag_agent_graph  # noqa: E402
+from multi_agent import graph as multi_agent_graph  # noqa: E402
 
 app = FastAPI(
     title="LangGraph Agents API",
