@@ -7,7 +7,7 @@ from operator import add as add_messages
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_core.tools import tool
 
@@ -48,7 +48,8 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 pages_split = text_splitter.split_documents(pages) # We now apply this to our pages
 
-persist_directory = r"C:\Vaibhav\LangGraph_Book\LangGraphCourse\Agents"
+# Use current script directory for persistence
+persist_directory = os.path.dirname(os.path.abspath(__file__))
 collection_name = "stock_market"
 
 # If our collection does not exist in the directory, we create using the os command
