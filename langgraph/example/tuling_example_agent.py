@@ -5,17 +5,25 @@ LangGraph 多Agent协作示例：Supervisor模式
 由主管Agent协调多个子Agent（航班助手、酒店助手）协同完成复杂任务。
 """
 
+# 导入日志模块，用于记录运行时信息
 import logging
 
+# 导入环境变量加载工具
 from dotenv import load_dotenv
+# 导入消息类型：AI消息、用户消息、工具消息
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+# 导入OpenAI聊天模型
 from langchain_openai import ChatOpenAI
+# 导入预构建的ReAct Agent创建函数
 from langgraph.prebuilt import create_react_agent
+# 导入Supervisor（主管）Agent创建函数，用于多Agent协作
 from langgraph_supervisor import create_supervisor
 
 # 加载环境变量（如 OPENAI_API_KEY）
 load_dotenv()
+# 配置日志级别为INFO，输出运行时信息
 logging.basicConfig(level=logging.INFO)
+# 获取当前模块的日志记录器
 logger = logging.getLogger(__name__)
 # 初始化大语言模型
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
@@ -53,13 +61,13 @@ hotel_assistant = create_react_agent(
 
 # 创建主管Agent（Supervisor），负责协调子Agent之间的任务分配
 supervisor = create_supervisor(
-    agents=[flight_assistant, hotel_assistant],
-    model=llm,
+    agents=[flight_assistant, hotel_assistant],  # 注册所有子Agent
+    model=llm,  # Supervisor使用的大语言模型
     prompt=(
         "你管理一个酒店预订助手和一个"
         "航班预订助手。将工作分配给它们。"
     ),
-).compile()
+).compile()  # 编译Supervisor图，使其可以执行
 
 if __name__ == "__main__":
     # 以流式方式运行Supervisor，发送用户请求
@@ -76,6 +84,7 @@ if __name__ == "__main__":
         # 遍历每个节点的输出，打印消息内容
         for node, state in chunk.items():
             for msg in state.get("messages", []):
+                # 过滤并打印用户消息、AI消息和工具消息
                 if isinstance(msg, (HumanMessage, AIMessage, ToolMessage)):
                     print(f"[{node}] {msg.pretty_print()}")
 

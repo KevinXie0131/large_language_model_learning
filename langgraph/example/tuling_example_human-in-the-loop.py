@@ -11,18 +11,26 @@ LangGraph Human-in-the-Loop 示例：酒店预订Agent
 - InMemorySaver: 检查点存储，用于在中断/恢复之间保持Agent状态
 """
 
+# 导入环境变量加载工具
 from dotenv import load_dotenv
+# 导入工具装饰器，用于将函数注册为Agent可调用的工具
 from langchain_core.tools import tool
+# 导入OpenAI聊天模型
 from langchain_openai import ChatOpenAI
+# 导入内存检查点存储器，用于中断/恢复之间保持状态
 from langgraph.checkpoint.memory import InMemorySaver
+# 导入中断和命令类型：interrupt用于暂停执行，Command用于恢复执行
 from langgraph.types import interrupt, Command
+# 导入预构建的ReAct Agent创建函数
 from langgraph.prebuilt import create_react_agent
 
 # 加载 .env 文件中的环境变量（如 OPENAI_API_KEY）
 load_dotenv()
+# 初始化大语言模型
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 
+# return_direct=True表示工具的返回值直接作为Agent的最终回复，不再经过LLM处理
 @tool(return_direct=True)
 def book_hotel(hotel_name: str):
     """预定宾馆
@@ -41,11 +49,13 @@ def book_hotel(hotel_name: str):
     )
 
     # 根据用户的审批结果处理
+    # 判断用户的审批类型并做相应处理
     if response["type"] == "OK":
         pass  # 用户确认，使用原始参数
     elif response["type"] == "edit":
         hotel_name = response["args"]["hotel_name"]  # 使用用户修改后的参数
     else:
+        # 未知的响应类型，抛出异常
         raise ValueError(f"Unknown response type: {response['type']}")
 
     return f"成功在 {hotel_name} 预定了一个房间。"
@@ -70,6 +80,7 @@ config = {
 
 if __name__ == "__main__":
     # 第一阶段：发送用户请求，Agent会调用 book_hotel 工具并在 interrupt() 处暂停
+    # 使用stream流式输出，逐步打印Agent的执行过程
     for chunk in agent.stream(
         {"messages": [{"role": "user", "content": "帮我在图灵宾馆预定一个房间"}]},
         config
@@ -77,12 +88,14 @@ if __name__ == "__main__":
         print(chunk)
         print("\n")
 
-    # 第二阶段：模拟用户审批通过，使用 Command(resume=...) 恢复Agent执行
+    # 第二阶段：模拟用户审批，使用 Command(resume=...) 恢复Agent执行
+    # 这里选择了"edit"模式，将酒店名修改为"三号宾馆"
     for chunk in agent.stream(
-       # Command(resume={"type": "OK"}),
+       # Command(resume={"type": "OK"}),  # 如果直接同意，取消此行注释
         Command(resume={"type": "edit", "args": {"hotel_name": "三号宾馆"}}),
         config
     ):
         print(chunk)
+        # 打印工具执行的最终结果
         print(chunk['tools']['messages'][-1].content)
         print("\n")

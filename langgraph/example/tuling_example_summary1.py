@@ -6,16 +6,23 @@ LangGraph 消息裁剪示例：基于 trim_messages 的上下文窗口管理
 与 tuling_example_summary.py 的区别：这里是直接截断旧消息，而不是生成摘要。
 """
 
+# 导入环境变量加载工具
 from dotenv import load_dotenv
+# 导入消息裁剪函数和近似token计数器
 from langchain_core.messages.utils import (
-    trim_messages,
-    count_tokens_approximately,
+    trim_messages,  # 按策略裁剪消息列表
+    count_tokens_approximately,  # 近似计算消息的token数
 )
+# 导入OpenAI聊天模型
 from langchain_openai import ChatOpenAI
+# 导入内存检查点存储器
 from langgraph.checkpoint.memory import InMemorySaver
+# 导入预构建的ReAct Agent创建函数
 from langgraph.prebuilt import create_react_agent
 
+# 加载.env文件中的环境变量
 load_dotenv()
+# 初始化大语言模型
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 
@@ -33,6 +40,7 @@ def pre_model_hook(state):
     return {"llm_input_messages": trimmed_messages}
 
 
+# 创建内存检查点存储器
 checkpointer = InMemorySaver()
 
 # 创建Agent，绑定 pre_model_hook 实现消息裁剪
@@ -44,6 +52,7 @@ agent = create_react_agent(
 )
 
 if __name__ == "__main__":
+    # 配置对话线程ID
     config = {"configurable": {"thread_id": "demo-thread"}}
 
     # 第一轮：发送多条消息，积累足够的历史让总结生效
@@ -63,21 +72,27 @@ if __name__ == "__main__":
     for i, msg in enumerate(conversations, 1):
         print(f"\n--- 第 {i} 轮对话 ---")
         print(f"用户: {msg}")
+        # 调用Agent处理用户消息
         result = agent.invoke({"messages": [{"role": "user", "content": msg}]}, config)
+        # 获取AI回复内容
         ai_reply = result["messages"][-1].content
         print(f"AI: {ai_reply}")
 
         # 查看当前状态中的消息数量
         state = agent.get_state(config)
+        # 获取状态中保存的全部消息列表
         all_msgs = state.values.get("messages", [])
 
         # 打印裁剪后实际发送给大模型的消息
+        # 获取裁剪后实际传给LLM的消息
         llm_input = state.values.get("llm_input_messages", [])
         if llm_input:
             print(f"  [裁剪后发送给LLM的消息数量: {len(llm_input)}]")
             for m in llm_input:
+                # 获取消息的角色和内容，兼容不同消息格式
                 m_role = getattr(m, "type", m.get("role", "unknown") if isinstance(m, dict) else "unknown")
                 m_content = getattr(m, "content", m.get("content", "") if isinstance(m, dict) else "")
+                # 截取前200个字符作为预览
                 print(f"    [{m_role}] {m_content[:200]}")
         print(f"  [状态中的消息数量: {len(all_msgs)}]")
 
@@ -92,7 +107,7 @@ if __name__ == "__main__":
     print(f"\n用户: 请问我叫什么名字？我之前做过什么项目？")
     print(f"AI: {result['messages'][-1].content}")
 
-    # 打印裁剪后实际发送给LLM的消息
+    # 获取最终状态，查看裁剪后实际发送给LLM的消息
     final_state = agent.get_state(config)
     llm_input = final_state.values.get("llm_input_messages", [])
     if llm_input:
@@ -103,11 +118,13 @@ if __name__ == "__main__":
             print(f"    [{m_role}] {m_content[:200]}")
 
     # 打印最终状态，查看总结效果
+    # 获取最终的Agent状态
     state = agent.get_state(config)
     print("\n" + "=" * 60)
     print("最终状态中的所有消息：")
     print("=" * 60)
     for msg in state.values.get("messages", []):
+        # 提取消息角色和内容，截取前100个字符作为预览
         role = getattr(msg, "type", "unknown")
         content = getattr(msg, "content", "")
         preview = content[:100] if content else "(empty)"

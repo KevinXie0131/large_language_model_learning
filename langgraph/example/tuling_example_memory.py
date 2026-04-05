@@ -5,14 +5,19 @@ LangGraph 记忆功能示例：基于CheckPointer的短期记忆
 保持对话上下文，实现多轮对话的短期记忆功能。
 """
 
+# 导入内存检查点存储器，用于保存对话状态
 from langgraph.checkpoint.memory import InMemorySaver
+# 导入预构建的ReAct Agent创建函数
 from langgraph.prebuilt import create_react_agent
+# 导入OpenAI聊天模型
 from langchain_openai import ChatOpenAI
 
 import os
 from datetime import datetime
+# 导入环境变量加载工具
 from dotenv import load_dotenv
 
+# 加载.env文件中的环境变量
 load_dotenv()
 
 # 创建内存检查点存储，用于在同一线程内保持对话上下文
@@ -23,6 +28,7 @@ def get_weather(city: str) -> str:
     """获取某个城市的天气"""
     return f"城市：{city}, 天气一直都是晴天！"
 
+# 初始化大语言模型
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 # 创建ReAct Agent，绑定工具和检查点存储
@@ -45,6 +51,7 @@ cs_response = agent.invoke(
     config
 )
 
+# 打印第一轮对话的完整响应
 print(cs_response)
 
 # 第二轮对话：使用相同的thread_id继续对话，Agent能记住上下文
@@ -53,4 +60,5 @@ bj_response = agent.invoke(
     config
 )
 
+# 打印第二轮对话的完整响应
 print(bj_response)
