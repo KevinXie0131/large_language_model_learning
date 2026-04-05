@@ -15,8 +15,8 @@ from langgraph.graph import END, StateGraph, MessagesState
 # 导入工具节点
 from langgraph.prebuilt import ToolNode
 
-url = 'https://api.siliconflow.cn/v1/'
-api_key = 'sk-chqxedzvmgomulnfrtyfihscoae zmjlqxvxhnzbtbabqitdb'
+url = 'https://api.openai.com/v1/'
+api_key = 'XXX'
 
 # 定义工具函数，用于代理调用外部工具
 @tool
@@ -39,7 +39,7 @@ tool_node = ToolNode(tools)
 model = ChatOpenAI(
     base_url=url,
     api_key=api_key,
-    model="deepseek-ai/DeepSeek-V3"
+    model="gpt-4o-mini"
 ).bind_tools(tools)
 
 # 定义函数，决定是否继续执行
@@ -104,7 +104,7 @@ print(result)
 
 # 再次调用，测试记忆功能（使用了相同的 thread_id: 42）
 final_state = app.invoke(
-    {"messages": [HumanMessage(content="我问的那个城市?")]},
+    {"messages": [HumanMessage(content="我问的那个城市? reply the name of city directly")]},
     config={"configurable": {"thread_id": 42}}
 )
 
