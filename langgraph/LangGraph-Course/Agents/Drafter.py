@@ -39,14 +39,19 @@ def update(content: str) -> str:
 
 # 保存文档到文件的工具
 @tool
-def save(filename: str) -> str:
+def save(filename: str, content: str = "") -> str:
     """Save the current document to a text file and finish the process.
 
     Args:
         filename: Name for the text file.
+        content: The full document content to save. Always provide the complete content to ensure it is saved correctly.
     """
 
     global document_content
+
+    # 如果传入了content参数，先更新全局文档内容
+    if content:
+        document_content = content
 
     # 如果文件名没有.txt后缀，自动添加
     if not filename.endswith('.txt'):
@@ -77,7 +82,8 @@ def our_agent(state: AgentState) -> AgentState:
     You are Drafter, a helpful writing assistant. You are going to help the user update and modify documents.
 
     - If the user wants to update or modify content, use the 'update' tool with the complete updated content.
-    - If the user wants to save and finish, you need to use the 'save' tool.
+    - If the user wants to save and finish, use the 'save' tool and always pass the full document content in the 'content' parameter.
+    - Do NOT call 'update' and 'save' in the same turn. Call 'save' with the content directly.
     - Make sure to always show the current document state after modifications.
 
     The current document content is:{document_content}
