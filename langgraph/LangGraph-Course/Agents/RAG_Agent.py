@@ -72,6 +72,7 @@ pages_split = text_splitter.split_documents(pages) # We now apply this to our pa
 # Use current script directory for persistence
 # 使用当前脚本目录作为持久化存储路径
 persist_directory = os.path.dirname(os.path.abspath(__file__))
+print(persist_directory)
 # 集合名称
 collection_name = "stock_market"
 
