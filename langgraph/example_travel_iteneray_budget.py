@@ -359,5 +359,5 @@ if __name__ == "__main__":
     print("流程执行完成！")
     print("=" * 50)
     
-    with open("example/graph.png", "wb") as f:
+    with open("example_travel_iteneray_budget_graph.png", "wb") as f:
         f.write(app.get_graph().draw_mermaid_png())
