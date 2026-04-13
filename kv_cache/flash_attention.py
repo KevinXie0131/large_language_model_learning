@@ -13,76 +13,78 @@ import functools
 import contextlib
 import matplotlib.pyplot as plt
 import torch.nn.functional as F
-from torch.nn.attention import sdpa_kernel, SDPBackend
+from torch.nn.attention import sdpa_kernel, SDPBackend  # sdpa_kernel: 选择注意力计算后端; SDPBackend: 定义可用的后端类型
 import torch
 
+# 使用 MATH 后端（标准数学实现，逐步计算 QK^T -> softmax -> V，未经特别优化）
 def run_naive_attention(q, k, v, is_causal=True):
     with sdpa_kernel(SDPBackend.MATH):
         return F.scaled_dot_product_attention(q, k, v, is_causal=is_causal)
 
+# 使用 FlashAttention 后端（通过分块计算和 IO 优化，大幅减少内存访问，速度更快）
 def run_flash_attention(q, k, v, is_causal=True):
     with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
         return F.scaled_dot_product_attention(q, k, v, is_causal=is_causal)
 
-# 1. 準備測試數據 (Shape: B, H, L, D)
-# 這段程式碼主要用於生成模擬的 Attention:
+# 1. 准备测试数据 (Shape: B, H, L, D)
+# 这段代码主要用于生成模拟的 Attention:
 # B (Batch Size): 批次大小。
-# H (Num Heads): 注意力頭的數量。
-# L (Sequence Length): 序列長度，即文本中 token 的數量。
-# D (Head Dimension): 每個注意力頭的特徵維度。
+# H (Num Heads): 注意力头的数量。
+# L (Sequence Length): 序列长度，即文本中 token 的数量。
+# D (Head Dimension): 每个注意力头的特征维度。
 B, H, L, D = 4, 8, 256, 64
 
-# q, k, v: 分別代表 Query, Key 和 Value，這是計算 Attention 所需的三個基本元素。
+# q, k, v: 分别代表 Query, Key 和 Value，这是计算 Attention 所需的三个基本元素。
 q = torch.randn(B, H, L, D)
 k = torch.randn(B, H, L, D)
 v = torch.randn(B, H, L, D)
 
-# 2. 執行不同的attention
+# 2. 执行不同的attention
 out_naive = run_naive_attention(q, k, v)
 out_flash = run_flash_attention(q, k, v)
 #print(out_naive.shape)
 
-# 3. 計算差異
+# 3. 计算差异
 diff = (out_naive - out_flash).abs().max().item()
-print("最大差異：", diff)
+print("最大差异：", diff)
 
 def benchmark_attention(mode, q, k, v, warmup=1, repeats=3):
     """
-    測試指定 Attention 模式的執行時間。
+    测试指定 Attention 模式的执行时间。
     mode 可以是 'naive' 或 'flash'。
     Returns: avg_latency_ms
     """
 
-    # 1. Warmup: Run the function 10 times without timing to stabilize the GPU state.
+    # 1. 预热：先执行几次，让 GPU 进入稳定状态，避免首次执行的额外开销影响计时
     for _ in range(warmup):
         if mode == 'naive':
             run_naive_attention(q, k, v)
         elif mode == 'flash':
             run_flash_attention(q, k, v)
 
-    torch.cuda.synchronize() #如果不加同步，你後面做計時或記憶體統計時，可能會不準。
+    torch.cuda.synchronize() #如果不加同步，你后面做计时或内存统计时，可能会不准。
 
-    # 2. Timing
+    # 2. 计时（使用 CUDA Event 精确测量 GPU 执行时间）
     start_event = torch.cuda.Event(enable_timing=True)
     end_event = torch.cuda.Event(enable_timing=True)
 
-    start_event.record() #從這裡開始算時間
+    start_event.record() #从这里开始算时间
     for _ in range(repeats):
         if mode == 'naive':
             run_naive_attention(q, k, v)
         elif mode == 'flash':
             run_flash_attention(q, k, v)
-    end_event.record() #到這裡結束計時
+    end_event.record() #到这里结束计时
 
-    torch.cuda.synchronize() #等整个 repeats 次 attention 都真的完成，再讀時間。
+    torch.cuda.synchronize() #等整个 repeats 次 attention 都真的完成，再读时间。
 
-    # 計算平均延遲 (毫秒)
+    # 计算平均延迟 (毫秒)
     avg_latency_ms = start_event.elapsed_time(end_event) / repeats
 
     return avg_latency_ms
 
-SEQ_LENS = [64, 128, 256, 512, 1024, 2048, 4096]
-B, H, D = [4, 8, 64]
+SEQ_LENS = [64, 128, 256, 512, 1024, 2048, 4096]  # 要测试的不同序列长度
+B, H, D = [4, 8, 64]  # 批次大小、注意力头数、头维度
 
 print(f"Starting Benchmarks ... Params: B={B}, H={H}, D={D}")
 print( "~" * 90)
@@ -90,29 +92,29 @@ print(f"{'Seq Len':<10} | {'Naive (ms)':<12} | {'Flash (ms)':<12} | {'Flash Spee
 print( "~" * 90)
 
 for L in SEQ_LENS:
-    # Generate random input tensors
+    # 生成随机输入张量
     q = torch.randn(B, H, L, D)
     k = torch.randn(B, H, L, D)
     v = torch.randn(B, H, L, D)
 
-    # Naive Attention
+    # 测试 Naive Attention
     lat_naive = benchmark_attention('naive', q, k, v)
     math_str = f"{lat_naive:.2f}"
 
-    torch.cuda.empty_cache()
+    torch.cuda.empty_cache()  # 清理 GPU 缓存，避免影响下一次测试
 
-    # Flash Attention
+    # 测试 Flash Attention
     lat_flash = benchmark_attention('flash', q, k, v)
     flash_str = f"{lat_flash:.2f}"
 
-    torch.cuda.empty_cache()
+    torch.cuda.empty_cache()  # 清理 GPU 缓存
 
-    # Calculate Speedup (Naive / Flash)
+    # 计算加速比（Naive 时间 / Flash 时间）
     speedup = "~"
     s = lat_naive / lat_flash
     speedup = f"{s:.2f}x"
 
-    # Print progress
+    # 输出本次结果
     print(f"{L:<10} | {math_str:<12} | {flash_str:<12} | {speedup:<15}")
 
 print( "~" * 90)
@@ -121,58 +123,60 @@ print("Benchmark completed.")
 from transformers import pipeline
 
 model_id = "google/gemma-3-4b-it"
-print(f"使用真實模型： {model_id} ...")
+print(f"使用真实模型： {model_id} ...")
 
-print("下載模型中...")
+print("下载模型中...")
+# eager: 使用标准逐步计算的注意力机制（未优化，作为基准对照）
 pipe_eager = pipeline(
     "text-generation",
     model=model_id,
     model_kwargs={"attn_implementation": "eager"}
 )
 
+# sdpa: 使用 PyTorch 的 Scaled Dot-Product Attention（会自动选用 FlashAttention 等优化后端）
 pipe_sdpa = pipeline(
     "text-generation",
     model=model_id,
     model_kwargs={"attn_implementation": "sdpa"}
 )
 
-long_text = "FlashAttention is a fast and memory-efficient exact attention algorithm. " * 1000 #改大一點試試看
-print(f"輸入長度： {len(long_text)} 字元\n")
+long_text = "FlashAttention is a fast and memory-efficient exact attention algorithm. " * 1000 #改大一点试试看
+print(f"输入长度： {len(long_text)} 字符\n")
 
-print(f"== 測試 Attention Implementation: Naive Attention ==")
+print(f"== 测试 Attention Implementation: Naive Attention ==")
 
-print("正在進行 Warmup...")
-pipe_eager("Hello", max_new_tokens=1)
+print("正在进行 Warmup...")
+pipe_eager("Hello", max_new_tokens=1)  # 只生成 1 个 token，目的是预热模型而非生成完整文本
 
-print("開始測試...")
+print("开始测试...")
 start_time = time.time()
 
-pipe_eager(long_text, max_new_tokens=1)
+pipe_eager(long_text, max_new_tokens=1)  # 测试长文本的推理速度（只生成 1 个 token，专注测量 prefill 阶段）
 
-torch.cuda.synchronize()
+torch.cuda.synchronize()  # 等待 GPU 操作完成，确保计时准确
 
 end_time = time.time()
 latency = end_time - start_time
-print(f"耗時： {latency:.4f} 秒")
+print(f"耗时： {latency:.4f} 秒")
 
-# 清理記憶體
+# 清理内存
 torch.cuda.empty_cache()
 
-print(f"== 測試 Attention Implementation: Flash Attention ==")
+print(f"== 测试 Attention Implementation: Flash Attention ==")
 
-print("正在進行 Warmup...")
-pipe_sdpa("Hello", max_new_tokens=1)
+print("正在进行 Warmup...")
+pipe_sdpa("Hello", max_new_tokens=1)  # 预热模型
 
-print("開始測試...")
+print("开始测试...")
 start_time = time.time()
 
-pipe_sdpa(long_text, max_new_tokens=1)
+pipe_sdpa(long_text, max_new_tokens=1)  # 测试 FlashAttention 对长文本的推理加速效果
 
-torch.cuda.synchronize()
+torch.cuda.synchronize()  # 等待 GPU 操作完成，确保计时准确
 
 end_time = time.time()
 latency = end_time - start_time
-print(f"耗時： {latency:.4f} 秒")
+print(f"耗时： {latency:.4f} 秒")
 
-# 清理記憶體
+# 清理内存
 torch.cuda.empty_cache()
