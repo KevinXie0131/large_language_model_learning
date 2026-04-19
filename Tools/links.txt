@@ -1,0 +1,50 @@
+Full-Stack Deep Learning with Python
+https://www.linkedin.com/learning/full-stack-deep-learning-with-python-34351133/full-stack-landscape-and-strategy?u=106279298
+
+Natural Language Processing (NLP) Fundamentals by Pearson
+https://www.linkedin.com/learning/natural-language-processing-nlp-fundamentals-by-pearson/natural-language-processing-nlp-fundamentals-introduction?resume=false&u=106279298
+
+Get up and running with PyTorch | LinkedIn Learning
+https://www.linkedin.com/learning/up-and-running-with-pytorch-by-pearson/up-and-running-with-pytorch-introduction?u=106279298
+
+Advanced Quantization Techniques for Large Language Models
+https://www.linkedin.com/learning/advanced-quantization-techniques-for-large-language-models/quantization-in-modern-llms?resume=false&u=106279298
+
+Deep Learning: Model Optimization and Tuning | LinkedIn Learning
+https://www.linkedin.com/learning/deep-learning-model-optimization-and-tuning-26415924/optimizing-neural-networks?u=106279298
+
+Hands-On AI: Build a Generative Language Model from Scratch
+https://www.linkedin.com/learning/hands-on-ai-build-a-generative-language-model-from-scratch/build-your-own-ai-from-scratch-26547412?resume=false&u=106279298
+
+Fine-Tuning for LLMs: from Beginner to Advanced
+https://www.linkedin.com/learning/fine-tuning-for-llms-from-beginner-to-advanced/beginning-to-fine-tune-your-llms?u=106279298
+
+Advanced NLP with Python for Machine Learning
+https://www.linkedin.com/learning/advanced-nlp-with-python-for-machine-learning-24079681/elevate-your-nlp-expertise-using-python-and-machine-learning?u=106279298
+
+Fine-Tune Your LLMs
+https://www.linkedin.com/learning/fine-tune-your-llms/introduction-to-fine-tuning-llms?u=106279298
+
+Agentic AI and Autonomous Development | LinkedIn Learning
+https://www.linkedin.com/learning/agentic-ai-and-autonomous-development/course-introduction-and-overview?u=106279298
+
+Agentic AI Design Patterns for GenAI and Predictive AI | LinkedIn Learning
+https://www.linkedin.com/learning/agentic-ai-design-patterns-for-genai-and-predictive-ai/introduction?u=106279298
+
+Agentic AI Solution Design Patterns | LinkedIn Learning
+https://www.linkedin.com/learning/agentic-ai-solution-design-patterns/introduction?u=106279298
+
+GraphRAG Essential Training | LinkedIn Learning
+https://www.linkedin.com/learning/graphrag-essential-training/prevent-genai-apps-from-hallucinating?u=106279298
+
+Knowledge Graph Data Engineering for Generative AI Use Cases | LinkedIn Learning
+https://www.linkedin.com/learning/knowledge-graph-data-engineering-for-generative-ai-use-cases/the-power-of-knowledge-graphs-in-data-engineering?u=106279298
+
+RAG Fine-Tuning: Advanced Techniques | LinkedIn Learning
+https://www.linkedin.com/learning/rag-fine-tuning-advanced-techniques-for-accuracy-and-model-performance/welcome-to-rag-and-finetuning?u=106279298
+
+Advanced LLMs with Retrieval Augmented Generation (RAG) | LinkedIn Learning
+https://www.linkedin.com/learning/advanced-llms-with-retrieval-augmented-generation-rag-practical-projects-for-ai-applications/course-introductions?u=106279298
+
+Advanced RAG Applications with Vector Databases | LinkedIn Learning
+https://www.linkedin.com/learning/advanced-rag-applications-with-vector-databases/rag-with-vector-databases-advanced-strategies-for-ai-optimization?u=106279298
