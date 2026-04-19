@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MessageState } from '../types';
+import { MessageState } from '../types.ts';
 
 interface MessagePreviewProps {
   state: MessageState;

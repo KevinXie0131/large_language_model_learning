@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ClaudeChatHistory, ClaudeMessage, ClaudePart } from '../types';
+import { ClaudeChatHistory, ClaudeMessage, ClaudePart } from '../types.ts';
 
 interface ChatHistoryProps {
   history: ClaudeChatHistory;

@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { parseRawSSE, reconstructMessage } from './services/sseParser';
-import { SSEEvent, MessageState, ClaudeChatHistory } from './types';
-import EventItem from './components/EventItem';
-import MessagePreview from './components/MessagePreview';
-import ChatHistory from './components/ChatHistory';
+import { parseRawSSE, reconstructMessage } from './services/sseParser.ts';
+import { SSEEvent, MessageState, ClaudeChatHistory } from './types.ts';
+import EventItem from './components/EventItem.tsx';
+import MessagePreview from './components/MessagePreview.tsx';
+import ChatHistory from './components/ChatHistory.tsx';
 
 const EXAMPLE_SSE = `HTTP/1.1 200 OK
 Date: Thu, 22 Jan 2026 07:47:40 GMT

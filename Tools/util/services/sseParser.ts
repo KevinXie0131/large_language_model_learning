@@ -1,5 +1,5 @@
 
-import { SSEEvent } from '../types';
+import { SSEEvent } from '../types.ts';
 
 export const parseRawSSE = (rawText: string): SSEEvent[] => {
   const lines = rawText.split('\n');

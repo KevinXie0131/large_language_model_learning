@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { SSEEvent } from '../types';
+import { SSEEvent } from '../types.ts';
 
 interface EventItemProps {
   event: SSEEvent;
