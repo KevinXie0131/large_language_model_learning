@@ -1,0 +1,6 @@
+# One YouTube URL per line. Lines starting with # are ignored.
+# Supported: youtube.com/watch?v=..., youtu.be/..., youtube.com/shorts/...
+# Example:
+# https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+https://www.youtube.com/watch?v=8mC62nZpqrA
